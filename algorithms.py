@@ -9,6 +9,7 @@ import os
 import psutil
 import gc
 from joblib import load, dump
+from math import floor, ceil
 
 
 def mem():
@@ -71,48 +72,63 @@ class Zipf:
         df.prob.plot(label="Probability Observed", style='.', logy=True, legend=True)
         plt.show()
         plt.savefig('report/eps/zipf.eps', format='eps')
-        return
+
+
+class StickySampling:
+
+    def __init__(self):
+        pass
+
+
+class Delta:
+
+    def __init__(self, e, f, d):
+        self.e = e
+        self.f = f
+        self.d = d
 
 
 class LossyCounting:
 
-    def __init__(self, s, e):
-        self.s = s
+    def __init__(self, e: float):
         self.e = e
-        self.d, self.m = 0, 0
-        self.counter = {}
-        self.k = 1 / e
+        self.d, self.N = 0, 0
+        self.D = {}
+        self.w = floor(1 / e)
+        self.N = 0
 
-    def feed(self, x):
-        self.m += 1
-        if x in self.counter:
-            self.counter[x] += 1
+    def get_b_curr(self):
+        return ceil(self.N / self.w)
+
+    def feed(self, x: int):
+        self.N += 1
+        if x in self.D:
+            self.D[x].f += 1
         else:
-            self.counter[x] = 1 + self.d
-        tmp = round(self.m / self.k)
-        if self.d != tmp:
-            self.d = tmp
-            _counter = defaultdict(lambda: 0)
-            for num, count in self.counter.items():
-                if count != self.d:
-                    _counter[num] = count
-            self.counter = _counter
+            self.D[x] = Delta(x, 1, self.get_b_curr() - 1)
 
-    def res(self):
-        ret = set([])
-        for key, value in self.counter.items():
-            if value > self.m * (self.s - self.e):
-                ret.add(key)
+        if self.N == 0 % self.w:
+            D = {}
+            for e, item in self.D.items():
+                if item.f + item.d > self.get_b_curr():
+                    D[e] = item
+            self.D = D
+
+    def request(self, s: float):
+        ret = set()
+        for e, item in self.D.items():
+            if item.f >= self.N * (s - self.e):
+                ret.add(e)
         return ret
 
 
 if __name__ == '__main__':
     zipf = Zipf(1, 100, 2)
-    zipf.proof(1000000)
+    zipf.proof(100000000)
 
-    lc = LossyCounting(0.02, 0.01)
+    lc = LossyCounting(e=0.00005)
     for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
         lc.feed(num)
-    lcRes = lc.res(),
-    zipfTrue = set(zipf.items[:len(lc.counter)])
+    lcRes = lc.request(s=0.0005)
+    zipfTrue = set(zipf.items[:len(lcRes)])
     print(lcRes, zipfTrue)
