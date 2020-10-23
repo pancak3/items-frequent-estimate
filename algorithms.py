@@ -90,8 +90,9 @@ class Delta:
 
 class LossyCounting:
 
-    def __init__(self, e: float):
+    def __init__(self, s, e: float):
         self.e = e
+        self.s = s
         self.d, self.N = 0, 0
         self.D = {}
         self.w = floor(1 / e)
@@ -114,10 +115,10 @@ class LossyCounting:
                     D[e] = item
             self.D = D
 
-    def request(self, s: float):
+    def request(self):
         ret = set()
         for e, item in self.D.items():
-            if item.f >= self.N * (s - self.e):
+            if item.f >= self.N * (self.s - self.e):
                 ret.add(e)
         return ret
 
@@ -126,9 +127,9 @@ if __name__ == '__main__':
     zipf = Zipf(1, 100, 2)
     zipf.proof(100000000)
 
-    lc = LossyCounting(e=0.00005)
+    lc = LossyCounting(s=0.001, e=0.0001)
     for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
         lc.feed(num)
-    lcRes = lc.request(s=0.0005)
+    lcRes = lc.request()
     zipfTrue = set(zipf.items[:len(lcRes)])
     print(lcRes, zipfTrue)
