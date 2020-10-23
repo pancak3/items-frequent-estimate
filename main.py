@@ -1,9 +1,3 @@
-import random
-import numpy as np
-from collections import defaultdict
-from pandas import DataFrame, read_csv
-import matplotlib.pyplot as plt
-from scipy.special import zeta
 import tqdm
 import os
 import psutil
@@ -11,6 +5,7 @@ import gc
 from zipf import Zipf
 from sticky_sampling import StickySampling
 from lossy_counting import LossyCounting
+from space_saving import SpaceSaving
 
 
 def mem():
@@ -21,21 +16,32 @@ def mem():
 
 if __name__ == '__main__':
     zipf = Zipf(1, 100, 2)
-    zipf.proof(1000000)
+    zipf.proof(100000)
 
     s = 0.001
     e = s / 10
     d = 0.001
-    ss = StickySampling(s=s, e=e, d=d)
+
+    sticky_sampling_ = StickySampling(s=s, e=e, d=d)
     for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
-        ss.feed(num)
-    lc = LossyCounting(s=s, e=e)
+        sticky_sampling_.feed(num)
+
+    lossy_counting_ = LossyCounting(s=s, e=e)
     for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
-        lc.feed(num)
+        lossy_counting_.feed(num)
+
+    space_sampling_ = SpaceSaving(1 / s)
+    for num in tqdm.tqdm(zipf.stream, desc="SpaceSampling"):
+        space_sampling_.feed(num)
 
     zipfTrue = zipf.request(s)
-    lcRes = lc.request()
+
+    lcRes = lossy_counting_.request()
     print(lcRes, zipfTrue)
 
-    ssRes = ss.request()
+    ssRes = sticky_sampling_.request()
     print(ssRes, zipfTrue)
+
+    ss_Res = space_sampling_.request()
+    print(ss_Res, zipfTrue)
+    print()
