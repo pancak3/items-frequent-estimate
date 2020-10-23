@@ -10,12 +10,11 @@ from joblib import load, dump
 
 class Zipf:
 
-    def __init__(self, low: int, high: int, z: int):
-        self.low = low
-        self.high = high
-        self.items = [i for i in range(low, high + 1)]
+    def __init__(self, z: int, distinct_nums: int):
+        self.distinct_nums = distinct_nums
+        self.items = [i for i in range(0, distinct_nums + 1)]
         self.z = z
-        self.probabilities = [1 / (i ** z) / zeta(self.z) for i in range(1, high - low + 2)]
+        self.probabilities = [1 / (i ** z) / zeta(self.z) for i in range(1, distinct_nums + 2)]
         self.stream = []
         self.df = None
         self.total = 0
@@ -35,9 +34,10 @@ class Zipf:
                 break
         return ret
 
-    def proof(self, size: int):
-        df_filename = "stream{}.df".format(size)
-        stream_filename = "stream{}.in".format(size)
+    def proof(self, stream_size: int):
+
+        df_filename = "zipf-{}-{}-stream-{}.df".format(self.z, self.distinct_nums, stream_size)
+        stream_filename = "zipf-{}-{}-stream-{}.in".format(self.z, self.distinct_nums, stream_size)
         if os.path.exists(df_filename):
             print("[*] read {} {}".format(stream_filename, df_filename))
             df = read_csv(df_filename, index_col="index")
@@ -50,7 +50,7 @@ class Zipf:
                 for num in tqdm.tqdm(self.stream, desc="zipf count"):
                     records[num]["count"] += 1
             else:
-                for _ in tqdm.tqdm(range(0, size), desc="zipf gen and count"):
+                for _ in tqdm.tqdm(range(0, stream_size), desc="zipf gen and count"):
                     num = self.gen()
                     records[num]["count"] += 1
                 print("[*] dump stream: {}".format(stream_filename))
@@ -71,4 +71,4 @@ class Zipf:
         df.theory.plot(label="Probability in Theory", style='.', logy=True, legend=True)
         df.prob.plot(label="Probability Observed", style='.', logy=True, legend=True)
         plt.show()
-        plt.savefig('report/eps/zipf{}.eps'.format(size), format='eps')
+        plt.savefig('report/eps/zipf{}.eps'.format(stream_size), format='eps')
