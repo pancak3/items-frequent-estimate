@@ -21,7 +21,7 @@ def mem():
 
 if __name__ == '__main__':
     zipf = Zipf(1, 100, 2)
-    zipf.proof(10000)
+    zipf.proof(1000000)
 
     s = 0.001
     e = s / 10

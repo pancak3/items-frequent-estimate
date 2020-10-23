@@ -37,18 +37,18 @@ class Zipf:
         df_filename = "stream{}.df".format(size)
         stream_filename = "stream{}.in".format(size)
         if os.path.exists(df_filename):
+            print("[*] read {} {}".format(stream_filename, df_filename))
             df = read_csv(df_filename, index_col="index")
             self.stream = load(stream_filename)
         else:
             records = defaultdict(lambda: {"count": 0, "prob": .0})
-
             if os.path.exists(stream_filename):
                 print("[*] load stream: {}".format(stream_filename))
                 self.stream = load(stream_filename)
-                for num in tqdm.tqdm(self.stream, desc="zipf"):
+                for num in tqdm.tqdm(self.stream, desc="zipf count"):
                     records[num]["count"] += 1
             else:
-                for _ in tqdm.tqdm(range(0, size), desc="zipf"):
+                for _ in tqdm.tqdm(range(0, size), desc="zipf gen and count"):
                     num = self.gen()
                     records[num]["count"] += 1
                 print("[*] dump stream: {}".format(stream_filename))
@@ -73,4 +73,4 @@ class Zipf:
         df.theory.plot(label="Probability in Theory", style='.', logy=True, legend=True)
         df.prob.plot(label="Probability Observed", style='.', logy=True, legend=True)
         plt.show()
-        plt.savefig('report/eps/zipf.eps', format='eps')
+        plt.savefig('report/eps/zipf{}.eps'.format(size), format='eps')
