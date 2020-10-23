@@ -4,3 +4,5 @@ __pycache__
 *.eps
 stream100.in
 .csv
+*.df
+*.in
