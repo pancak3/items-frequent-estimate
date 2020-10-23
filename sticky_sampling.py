@@ -1,0 +1,57 @@
+import random
+from math import ceil, log
+
+
+class EntryStickySampling:
+
+    def __init__(self, e, f):
+        self.e = e
+        self.f = f
+
+
+class StickySampling:
+
+    def __init__(self, s, e, d):
+        self.S = {}
+        self.r = 1
+        self.e = e
+        self.d = d
+        self.s = s
+        self.t = ceil(1 / e * log(1 / (s * d)))
+        self.N = 0
+
+    def get_rate(self):
+        rate = ceil(self.N / 2 * self.t)
+        if rate != self.r:
+            S = {}
+            for entry in self.S.values():
+                # repeatedly toss an unbiased coin until the coin toss is successful
+                coin = 1
+                while coin:
+                    #  we repeatedly toss an unbiased coin until the coin toss is successful,
+                    #  diminishing by one for every unsuccessful outcome
+                    coin = random.randint(0, 1)
+                    entry.f -= 1
+                # if f becomes during this process, we delete the entry from S
+                if entry.f > 0:
+                    S[entry.e] = entry
+
+            self.r = rate
+        return self.r
+
+    def feed(self, x):
+        self.N += 1
+        if x in self.S:
+            self.S[x].f += 1
+        else:
+            rate = 1 / self.get_rate()
+            toll = random.choices([True, False], [rate, 1 - rate])
+            if toll:
+                self.S[x] = EntryStickySampling(e=x, f=1)
+
+    def request(self):
+        ret = set()
+        for entry in self.S.values():
+            if entry.f >= self.N * (self.s - self.e):
+                ret.add(entry.e)
+        return ret
