@@ -6,6 +6,7 @@ from zipf import Zipf
 from sticky_sampling import StickySampling
 from lossy_counting import LossyCounting
 from space_saving import SpaceSaving
+from baseline import Baseline
 
 
 def mem():
@@ -22,6 +23,10 @@ if __name__ == '__main__':
     e = s / 10
     d = 0.001
 
+    baseline_ = Baseline()
+    for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
+        baseline_.feed(num)
+
     sticky_sampling_ = StickySampling(s=s, e=e, d=d)
     for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
         sticky_sampling_.feed(num)
@@ -34,14 +39,14 @@ if __name__ == '__main__':
     for num in tqdm.tqdm(zipf.stream, desc="SpaceSampling"):
         space_sampling_.feed(num)
 
-    zipfTrue = zipf.request(s)
+    baseline_res = baseline_.request(s)
+    print(baseline_res)
 
     lcRes = lossy_counting_.request()
-    print(lcRes, zipfTrue)
+    print(lcRes)
 
     ssRes = sticky_sampling_.request()
-    print(ssRes, zipfTrue)
+    print(ssRes)
 
     ss_Res = space_sampling_.request()
-    print(ss_Res, zipfTrue)
-    print()
+    print(ss_Res)

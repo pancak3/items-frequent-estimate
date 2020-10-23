@@ -18,10 +18,12 @@ class Zipf:
         self.probabilities = [1 / (i ** z) / zeta(self.z) for i in range(1, high - low + 2)]
         self.stream = []
         self.df = None
+        self.total = 0
 
     def gen(self):
         num = random.choices(self.items, self.probabilities)[0]
         self.stream.append(num)
+        self.total += 1
         return num
 
     def request(self, s):
@@ -54,12 +56,8 @@ class Zipf:
                 print("[*] dump stream: {}".format(stream_filename))
                 dump(self.stream, filename=stream_filename)
 
-            total = 0
-            for entry in records.values():
-                total += entry["count"]
-
             for key, value in records.items():
-                records[key]["prob"] = value["count"] / total
+                records[key]["prob"] = value["count"] / self.total
                 records[key]["theory"] = self.probabilities[key - 1]
 
             df = DataFrame(data=records, columns=records.keys()).T
