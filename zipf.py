@@ -7,7 +7,7 @@ import tqdm
 import os
 from math import log
 from joblib import load, dump
-from   helpers import sci
+from helpers import sci
 
 
 class Zipf:
@@ -83,4 +83,5 @@ class Zipf:
         plt.legend()
         plt.title(r'Power-law Distribution; $z = {}$, {} items'.format(self.z, sci(stream_size)))
         plt.show()
-        plt.savefig('report/eps/zipf-{}-{}-stream-{}.eps'.format(self.z, self.distinct_nums, stream_size), format='eps')
+        ax.get_figure().savefig('report/eps/zipf-{}-{}-stream-{}.eps'.format(self.z, self.distinct_nums, stream_size),
+                                format='eps')

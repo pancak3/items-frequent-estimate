@@ -1,0 +1,100 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, left=25mm, top=25mm, right=25mm, bottom=25mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage[english]{babel,isodate}
+\usepackage[pdftex, pdfauthor={Qifan Deng},
+ pdftitle={COMP90056 - Stream Computing and Applications 2020, Assignment 2}, 
+ pdfsubject={COMP90056 Assignment}]{hyperref}
+\usepackage{pgfplots} 
+\usepackage{SIunits}        % <-- required in preamble
+\pgfplotsset{compat=newest} % 
+\usepackage[justification=centering]{caption}
+\usepackage{minted}
+\usepackage{enumitem}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage{epstopdf}
+
+\newcommand\gauss[2]{1/(#2*sqrt(2*pi))*exp(-((x-#1)^2)/(2*#2^2))}
+\newcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+\setlength{\columnsep}{20pt}
+\setlength{\parindent}{8pt}
+\setlength{\parskip}{3pt}
+
+\pgfplotsset{compat=1.16}
+
+\title{COMP90056 - Stream Computing and Applications 2020, Assignment 2 
+\\Frequent Items in a Data Stream}
+\author{
+  Qifan Deng (1077479)\\
+  \texttt{qifand@student.unimelb.edu.au} }
+\date{\printdayoff\normalsize\today}
+
+\begin{document}
+\sloppy
+% \twocolumn
+\maketitle
+
+\section{Introduction}
+Three algorithms are implemented in this report to estimate the most frequent items of a data stream.
+They are StickySampling, LossyCounting and SpaceSaving. 
+There is also a Baseline algorithm implemented to investigate the performance of the three algorithms.
+Results of experiments are provided in Section? which show ? 
+
+\section{Hardware \& Environments \& Data Stream}
+
+\paragraph{Hardware}
+The experiments in section are conducted on a machin with the following specs
+\begin{itemize}
+     \setlength\itemsep{1pt}
+       \item CPU: 1.8 GHz Quad-Core Intel Core i5
+       \item Memory: 8 GB 2133 MHz LPDDR3
+       \item Disk: WDC PC SN720 SDAPNTW-512G-1127 SSD
+\end{itemize}
+\paragraph{Environment}
+The testing system is macOS Catalina version 10.15.7 (19H2).
+All the algorithms are implemented in Python 3.8.5.
+The requirements of the algorithms are stored in requirements.txt which can be installed with command pip install -r requirements.txt.
+
+\paragraph{Data Stream}
+The data stream obeys power-law distribution where 
+the $i^{th}$ most frequent item has probability $\frac{1}{i^{z} \cdot{} Zeta(z)}$
+where $z$ is a positive real-value parameter and $Zeta$ is Riemann or Hurwitz zeta function ?. 
+Figure~\ref{power-law} shows the distribution when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
+
+
+\begin{figure}
+     \begin{subfigure}[b]{0.5\textwidth}
+          \centering
+          \resizebox{\linewidth}{!}{\includegraphics{eps/zipf-1.1-100-stream-1000000.eps}}
+          \label{power-law-z-1.1-100-stream-1000000}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+          \centering
+          \resizebox{\linewidth}{!}{\includegraphics{eps/zipf-1.4-100-stream-1000000.eps}}
+          \label{power-law-z-1.4-100-stream-1000000}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+          \centering
+          \resizebox{\linewidth}{!}{\includegraphics{eps/zipf-1.7-100-stream-1000000.eps}}
+          \label{power-law-z-1.7-100-stream-1000000}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+          \centering
+          \resizebox{\linewidth}{!}{\includegraphics{eps/zipf-2.0-100-stream-1000000.eps}}
+          \label{power-law-z-2.0-100-stream-1000000}
+    \end{subfigure}
+ 
+    \caption{Power-law distribution with $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$}
+    \label{power-law}
+\end{figure}
+
+\bibliographystyle{IEEEtran}
+\bibliography{main}
+\end{document}
