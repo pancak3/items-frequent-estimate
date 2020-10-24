@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.special import zeta
 import tqdm
 import os
+import numpy   as np
 from math import log
 from joblib import load, dump
 from helpers import sci
@@ -17,6 +18,8 @@ class Zipf:
         self.items = [i for i in range(1, distinct_nums + 2)]
         self.z = z
         self.probabilities = [1 / (i ** z) / zeta(self.z) for i in range(1, distinct_nums + 2)]
+        self.probabilities = np.array(self.probabilities)
+        self.probabilities /= self.probabilities.sum()
         self.stream = []
         self.df = None
         self.total = 0
