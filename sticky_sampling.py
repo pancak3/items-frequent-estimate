@@ -1,5 +1,5 @@
 import random
-from math import ceil, log
+from math import ceil, log, floor
 
 
 class EntryStickySampling:
@@ -21,7 +21,7 @@ class StickySampling:
         self.N = 0
 
     def get_rate(self):
-        rate = ceil(self.N / 2 * self.t)
+        rate = 1 if self.N == 1 else 2 ** (floor(log(self.N - 1, 2)))
         if rate != self.r:
             S = {}
             for entry in self.S.values():

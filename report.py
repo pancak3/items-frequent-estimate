@@ -27,7 +27,7 @@ def mem(garbage_collection=False):
     return process.memory_info().rss
 
 
-def test(z: int, distinct_nums: int, s: float, d: float, stream_size: int):
+def test(z: float, distinct_nums: int, s: float, d: float, stream_size: int):
     zipf = Zipf(z, distinct_nums)
     zipf.proof(stream_size)
     e = s / 10
@@ -80,5 +80,15 @@ def test(z: int, distinct_nums: int, s: float, d: float, stream_size: int):
     pprint(vars(space_sampling_res))
 
 
+def power_law():
+    zs = [1.1, 1.4, 1.7, 2.0]
+
+    for z in zs:
+        zipf = Zipf(z, 100)
+        zipf.proof(1000000)
+
+
 def run():
-    test(z=2, distinct_nums=100, s=0.0001, d=0.01, stream_size=100000000)
+    # test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=10000000)
+
+    power_law()

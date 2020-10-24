@@ -5,14 +5,16 @@ import matplotlib.pyplot as plt
 from scipy.special import zeta
 import tqdm
 import os
+from math import log
 from joblib import load, dump
+from   helpers import sci
 
 
 class Zipf:
 
-    def __init__(self, z: int, distinct_nums: int):
+    def __init__(self, z: float, distinct_nums: int):
         self.distinct_nums = distinct_nums
-        self.items = [i for i in range(0, distinct_nums + 1)]
+        self.items = [i for i in range(1, distinct_nums + 2)]
         self.z = z
         self.probabilities = [1 / (i ** z) / zeta(self.z) for i in range(1, distinct_nums + 2)]
         self.stream = []
@@ -70,9 +72,15 @@ class Zipf:
             df.to_csv(path_or_buf=df_filename, index=False)
 
         self.df = df
-
+        greater = df["count"][df["prob"] >= .01].sum()
         plt.figure()
-        df.theory.plot(label="Probability in Theory", style='.', logy=True, legend=True)
-        df.prob.plot(label="Probability Observed", style='.', logy=True, legend=True)
+        ax = df.theory.plot(label="In Theory", style='.', logy=True, legend=True)
+        df.prob.plot(label="Observed", style='.', logy=True, legend=True)
+        ax.set_xlabel(r'$i^{th}$ most frequent item')
+        ax.set_ylabel(r'Probability')
+        ax.axhline(y=.01, ls="--", label="1%", color="gray")
+        ax.annotate(r'$\geq$1%: {} out of {}'.format(sci(greater), sci(stream_size)), (10, 0.05))
+        plt.legend()
+        plt.title(r'Power-law Distribution; $z = {}$, {} items'.format(self.z, sci(stream_size)))
         plt.show()
-        plt.savefig('report/eps/zipf{}.eps'.format(stream_size), format='eps')
+        plt.savefig('report/eps/zipf-{}-{}-stream-{}.eps'.format(self.z, self.distinct_nums, stream_size), format='eps')
