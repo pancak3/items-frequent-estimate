@@ -117,18 +117,16 @@ The theoretical performance of them should be what Table~\ref{theoretical_perfor
       \hline
       & Baseline & StickySampling & LossyCounting & SpaceSaving \\ [0.5ex] 
       \hline\hline
-      Update Time & $O(1)$ &  $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ & $O(\frac{1}{\epsilon}log(\epsilon{}N))$ & $O(log(m))$ \\
+      Update Time & $O(1)$ &  $O(\frac{20}{s}(log(\frac{100}{s}))$ & $O(\frac{10}{s}log(\frac{sN}{10}))$ & $O(log(s^{-1}))$ \\
       \hline
-      Memory & $O(n)$ & $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ & $O(\frac{1}{\epsilon}log(\epsilon{}N))$ & $O(m)$ \\ 
+      Memory & $O(n)$ & $O(\frac{20}{s}(log(\frac{100}{s}))$ & $O(\frac{10}{s}log(\frac{sN}{10}))$& $O(s^{-1})$ \\ 
       \hline
       Accuracy & 100\% &545 & 778 & 7507 \\
       \hline
       \end{tabular}
      \caption{Theoretical performance of Baseline, StickySampling, LossyCounting and SpaceSaving;
-      $s$ is support, $\epsilon{}$ is $s/10$, $\delta{}$ is chosen to be 0.01,
-      $N$ is the current lenth of the stream, 
-      $n$ is the number of distinct items in stream 
-      and $m$ is number of the initialed counter of SpaceSaving}
+      $s$ is support, $N$ is the current lenth of the stream and
+      $n$ is the number of distinct items in stream.}
       \label{theoretical_performance}
 \end{table}
 
@@ -138,7 +136,15 @@ where $TP$ is true positive, $TN$ is true negative, $FP$ is false negative and $
 The update time of Baseline is $O(1)$ because it just increament the corresponding $f$ with no other operation when updates.
 Its memory cost is $O(n)$ since it stores every distinct items. And accuracy is 100\% obviously.
 \paragraph{StickySampling}
-The memory cost of StockySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ?.
+In a power-law distribution data stream, the probability of occurrences drop rapidly at the begaining 
+of the increasing order. In this kind of distribution, StickySampling algorithm works. 
+Because items with high probability tends to appear earlier when the rate to be selected is higher.
+Thus, they accumulate higher frequencies to against frequency diminising at the timepoint of rate changing.
+But items with lower probabilities have higher chance to be evicted at the moment.
+As the algorithm processing, items with higher probabilities are kept.
+
+The memory cost of StockySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ? 
+($\epsilon{}$ is chosen to be $s/10$ and $\delta{}$ is chosen to be 0.01).
 Its update time is also $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ because the counters are iterated when the rate $r$ changes.
 \paragraph{LossyCounting}
 The memory cost of StockySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$ 
@@ -146,8 +152,8 @@ The memory cost of StockySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$
 % new items have decresing chances to remove a counter at boundaries.
 Its update time is then $O(\frac{1}{\epsilon}log(\epsilon{}N))$ because it iterates all counters at boundaries.
 \paragraph{SpaceSaving}
-SpaceSaving has a fixed number of counters which is $m$, so its memory cost is $O(m)$. 
-And the update time is $O(log(m))$ because the QuickSort is used when updates.
+SpaceSaving has a fixed number of counters which is $m = 1/s$, so its memory cost is $O(1/s)$. 
+And the update time is $O(log(1/s))$ because the QuickSort is used when updates.
 
 \bibliographystyle{IEEEtran}
 \bibliography{main}

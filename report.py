@@ -9,10 +9,12 @@ from space_saving import SpaceSaving
 from baseline import Baseline
 from time import time
 from pprint import pprint
+from pandas import DataFrame
 
 
 class Result:
-    def __init__(self, time_cost, counters_used, res, baseline_res, all_items):
+    def __init__(self, algorithm_name, time_cost, counters_used, res, baseline_res, all_items):
+        self.algorithm = algorithm_name
         self.time_cost = time_cost
         self.counters_used = counters_used
 
@@ -44,47 +46,54 @@ def test(z: float, distinct_nums: int, s: float, d: float, stream_size: int):
     for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
         baseline_.feed(num)
 
-    baseline_res = baseline_.request(s)
+    baseline_res_ = baseline_.request(s)
 
-    baseline_res_ = Result(time() - start_time,
-                           len(baseline_.counter),
-                           baseline_res,
-                           baseline_res,
-                           zipf.items)
-    pprint(vars(baseline_res_))
+    baseline_res = Result("Baseline",
+                          time() - start_time,
+                          len(baseline_.counter),
+                          baseline_res_,
+                          baseline_res_,
+                          zipf.items)
 
     start_time = time()
     sticky_sampling_ = StickySampling(s=s, e=e, d=d)
     for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
         sticky_sampling_.feed(num)
-    sticky_sampling_res = Result(time() - start_time,
+    sticky_sampling_res = Result("StickySampling",
+                                 time() - start_time,
                                  len(sticky_sampling_.S),
                                  sticky_sampling_.request(),
-                                 baseline_res,
+                                 baseline_res_,
                                  zipf.items)
-    pprint(vars(sticky_sampling_res))
 
     start_time = time()
     lossy_counting_ = LossyCounting(s=s, e=e)
     for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
         lossy_counting_.feed(num)
-    lossy_counting_res = Result(time() - start_time,
+    lossy_counting_res = Result("LossyCounting",
+                                time() - start_time,
                                 len(lossy_counting_.D),
                                 lossy_counting_.request(),
-                                baseline_res,
+                                baseline_res_,
                                 zipf.items)
-    pprint(vars(lossy_counting_res))
 
     start_time = time()
-    space_sampling_ = SpaceSaving(1/s)
+    space_sampling_ = SpaceSaving(1 / s)
     for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
         space_sampling_.feed(num)
-    space_sampling_res = Result(time() - start_time,
+    space_sampling_res = Result("SpaceSaving",
+                                time() - start_time,
                                 len(space_sampling_.C),
                                 space_sampling_.request(),
-                                baseline_res,
+                                baseline_res_,
                                 zipf.items)
-    pprint(vars(space_sampling_res))
+
+    df = DataFrame(data=[vars(baseline_res).values(),
+                         vars(sticky_sampling_res).values(),
+                         vars(lossy_counting_res).values(),
+                         vars(space_sampling_res).values()],
+                   columns=vars(baseline_res).keys())
+    print(df)
 
 
 def power_law():
@@ -96,6 +105,6 @@ def power_law():
 
 
 def run():
-    test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=10000)
+    test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=1000000)
 
     # power_law()
