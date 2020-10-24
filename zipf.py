@@ -55,6 +55,10 @@ class Zipf:
                     records[num]["count"] += 1
                 print("[*] dump stream: {}".format(stream_filename))
                 dump(self.stream, filename=stream_filename)
+            self.total = 0
+
+            for value in records.values():
+                self.total += value["count"]
 
             for key, value in records.items():
                 records[key]["prob"] = value["count"] / self.total

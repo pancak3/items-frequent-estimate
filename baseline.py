@@ -11,11 +11,12 @@ class Baseline:
         self.total += 1
 
     def request(self, s):
-        ret = set([])
+        ret = [[], []]
         counter_in_order = {k: v for k, v in sorted(self.counter.items(), key=lambda item: item[1], reverse=True)}
         for e, count in counter_in_order.items():
             if count / self.total >= s:
-                ret.add(e)
+                ret[0].append(e)
+                ret[1].append(count)
             else:
                 break
         return ret

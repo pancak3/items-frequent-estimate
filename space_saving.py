@@ -19,7 +19,6 @@ class SpaceSaving:
     def sort_entries(self):
         self.SortedC = self.C.values()
         sorted(self.SortedC, key=lambda x: x.f)
-        return self.SortedC
 
     def feed(self, x):
         if x in self.C:
@@ -37,4 +36,8 @@ class SpaceSaving:
             del self.C[self.SortedC[0].e]
 
     def request(self):
-        return set([entry.e for entry in self.C.values()])
+        ret = [[], []]
+        for entry in self.C.values():
+            ret[0].append(entry.e)
+            ret[1].append(entry.f)
+        return ret

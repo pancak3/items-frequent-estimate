@@ -50,8 +50,9 @@ class StickySampling:
                 self.S[x] = EntryStickySampling(e=x, f=1)
 
     def request(self):
-        ret = set()
+        ret = [[], []]
         for entry in self.S.values():
             if entry.f >= self.N * (self.s - self.e):
-                ret.add(entry.e)
+                ret[0].append(entry.e)
+                ret[1].append(entry.f)
         return ret

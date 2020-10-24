@@ -37,8 +37,9 @@ class LossyCounting:
             self.D = D
 
     def request(self):
-        ret = set()
+        ret = [[],[]]
         for entry in self.D.values():
             if entry.f >= self.N * (self.s - self.e):
-                ret.add(entry.e)
+                ret[0].append(entry.e)
+                ret[1].append(entry.f)
         return ret
