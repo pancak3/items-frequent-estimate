@@ -58,16 +58,19 @@ The experiments in section are conducted on a machin with the following specs
        \item Disk: WDC PC SN720 SDAPNTW-512G-1127 SSD
 \end{itemize}
 \paragraph{Environment}
-The testing system is macOS Catalina version 10.15.7 (19H2).
+The testing operating system is macOS Catalina version 10.15.7 (19H2).
 All the algorithms are implemented in Python 3.8.5.
 The requirements of the algorithms are stored in requirements.txt which can be installed with command pip install -r requirements.txt.
 
 \paragraph{Data Stream}
-The data stream obeys power-law distribution where 
+The data stream is power-law distribution where 
 the $i^{th}$ most frequent item has probability $\frac{1}{i^{z} \cdot{} Zeta(z)}$
 where $z$ is a positive real-value parameter and $Zeta$ is Riemann or Hurwitz zeta function ?. 
-Figure~\ref{power-law} shows the distribution when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
-As it shows, they have almost the ideal trend except when $z$ is close to 1. This proves that data streams in this report are desired.
+Figure~\ref{powerlaw} shows the distribution when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
+As it shows, they have almost the ideal trend except when $z$ is close to 1. 
+This proves that data streams in this report are desired.
+Besides, as Figure~\ref{powerlaw} annotates, there are $717130$ items has frequency at least 1\% when $z=1.1$,  
+$819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
 
 
 \begin{figure}
@@ -93,7 +96,7 @@ As it shows, they have almost the ideal trend except when $z$ is close to 1. Thi
     \end{subfigure}
  
     \caption{Power-law distribution with $z = \{1.1, 1.4, 1.7, 2.0\}$ and data stream size $10^6$}
-    \label{power-law}
+    \label{powerlaw}
 \end{figure}
 
 \section{Implementations}
@@ -104,26 +107,48 @@ If $x$ is not in $C$ , set $C_n$ to $<x, 1>$. Otherwise, increment $C_x$ to $<x,
 When user requests with support $s$, return the entries with $f$ greater than $f\cdot{}N$.
 \paragraph{StickySampling \& LossyCounting \& SpaceSaving}
 These three algorithms are implemented following the respective papers.
-The theoretical performance of them should be that Table~\ref{theretical_performance} shows.
-\paragraph{Theoretical Performance}
+
+The theoretical performance of them should be what Table~\ref{theoretical_performance} shows.
+
+\subsection{Theoretical Performance \& Justification}
 \begin{table}[h!]
      \centering
       \begin{tabular}{||c | c | c| c| c||} 
       \hline
       & Baseline & StickySampling & LossyCounting & SpaceSaving \\ [0.5ex] 
       \hline\hline
-      Update Time & $O(1)$ & $O(n)$ & $O(n)$ & $O(log(m))$ \\
+      Update Time & $O(1)$ &  $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ & $O(\frac{1}{\epsilon}log(\epsilon{}N))$ & $O(log(m))$ \\
       \hline
-      Memory & $O(n)$ & $O(n)$ & $O(n)$ & $O(m)$ \\ 
+      Memory & $O(n)$ & $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ & $O(\frac{1}{\epsilon}log(\epsilon{}N))$ & $O(m)$ \\ 
       \hline
       Accuracy & 100\% &545 & 778 & 7507 \\
       \hline
       \end{tabular}
-     \caption{Theoretical Performance of Baseline, StickySampling, LossyCounting and SpaceSaving;
-      $n$ is the number of distinct items, $m$ is number os the initialed counter of SpaceSaving}
-      \label{theretical_performance}
+     \caption{Theoretical performance of Baseline, StickySampling, LossyCounting and SpaceSaving;
+      $s$ is support, $\epsilon{}$ is $s/10$, $\delta{}$ is chosen to be 0.01,
+      $N$ is the current lenth of the stream, 
+      $n$ is the number of distinct items in stream 
+      and $m$ is number of the initialed counter of SpaceSaving}
+      \label{theoretical_performance}
 \end{table}
-     
+
+The accuracy is defined to be $(TP + TN) / (TP + TN + FP + FN)$ 
+where $TP$ is true positive, $TN$ is true negative, $FP$ is false negative and $FN$ is false negative.
+\paragraph{Baseline}
+The update time of Baseline is $O(1)$ because it just increament the corresponding $f$ with no other operation when updates.
+Its memory cost is $O(n)$ since it stores every distinct items. And accuracy is 100\% obviously.
+\paragraph{StickySampling}
+The memory cost of StockySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ?.
+Its update time is also $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ because the counters are iterated when the rate $r$ changes.
+\paragraph{LossyCounting}
+The memory cost of StockySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$ 
+% because the chance of removing counter decreases as items coming when the items distribution is power-law, i.e., 
+% new items have decresing chances to remove a counter at boundaries.
+Its update time is then $O(\frac{1}{\epsilon}log(\epsilon{}N))$ because it iterates all counters at boundaries.
+\paragraph{SpaceSaving}
+SpaceSaving has a fixed number of counters which is $m$, so its memory cost is $O(m)$. 
+And the update time is $O(log(m))$ because the QuickSort is used when updates.
+
 \bibliographystyle{IEEEtran}
 \bibliography{main}
 \end{document}

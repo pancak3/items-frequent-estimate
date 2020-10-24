@@ -16,7 +16,7 @@ class LossyCounting:
         self.s = s
         self.d, self.N = 0, 0
         self.D = {}
-        self.w = floor(1 / e)
+        self.w = 1 / e
         self.N = 0
 
     def get_b_curr(self):

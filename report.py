@@ -18,9 +18,9 @@ class Result:
 
         estimate, actual, all_items = set(res[0]), set(baseline_res[0]), set(all_items)
         tp = len(estimate.intersection(actual))
-        tn = len(estimate.difference(actual))
-        fp = len(all_items.difference(estimate).intersection(actual))
-        fn = len(all_items.difference(estimate).intersection(all_items.difference(actual)))
+        tn = len(all_items.difference(estimate).intersection(all_items.difference(actual)))
+        fp = len(estimate.difference(actual))
+        fn = len(all_items.difference(estimate).intersection(actual))
         # Accuracy = (TP + TN) / (TP + TN + FP + FN)
         # Precision = TP / (TP + FP)
         self.precision = tp / (tp + fp)
@@ -96,6 +96,6 @@ def power_law():
 
 
 def run():
-    test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=100000)
+    test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=10000)
 
     # power_law()
