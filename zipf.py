@@ -39,7 +39,7 @@ class Zipf:
                 break
         return ret
 
-    def proof(self, stream_size: int):
+    def proof(self, stream_size: int, draw=True):
 
         df_filename = "zipf-{}-{}-stream-{}.df".format(self.z, self.distinct_nums, stream_size)
         stream_filename = "zipf-{}-{}-stream-{}.in".format(self.z, self.distinct_nums, stream_size)
@@ -75,16 +75,19 @@ class Zipf:
             df.to_csv(path_or_buf=df_filename, index=False)
 
         self.df = df
-        greater = df["count"][df["prob"] >= .01].sum()
-        plt.figure()
-        ax = df.theory.plot(label="In Theory", style='.', logy=True, legend=True)
-        df.prob.plot(label="Observed", style='.', logy=True, legend=True)
-        ax.set_xlabel(r'$i^{th}$ most frequent item')
-        ax.set_ylabel(r'Probability')
-        ax.axhline(y=.01, ls="--", label="1%", color="gray")
-        ax.annotate(r'$\geq$1%: {} out of {}'.format(sci(greater), sci(stream_size)), (10, 0.05))
-        plt.legend()
-        plt.title(r'Power-law Distribution; $z = {}$, {} items'.format(self.z, sci(stream_size)))
-        plt.show()
-        ax.get_figure().savefig('report/eps/zipf-{}-{}-stream-{}.eps'.format(self.z, self.distinct_nums, stream_size),
-                                format='eps')
+
+        if draw:
+            greater = df["count"][df["prob"] >= .01].sum()
+            plt.figure()
+            ax = df.theory.plot(label="In Theory", style='.', logy=True, legend=True)
+            df.prob.plot(label="Observed", style='.', logy=True, legend=True)
+            ax.set_xlabel(r'$i^{th}$ most frequent item')
+            ax.set_ylabel(r'Probability')
+            ax.axhline(y=.01, ls="--", label="1%", color="gray")
+            ax.annotate(r'$\geq$1%: {} out of {}'.format(sci(greater), sci(stream_size)), (10, 0.05))
+            plt.legend()
+            plt.title(r'Power-law Distribution; $z = {}$, {} items'.format(self.z, sci(stream_size)))
+            plt.show()
+            ax.get_figure().savefig(
+                'report/eps/zipf-{}-{}-stream-{}.eps'.format(self.z, self.distinct_nums, stream_size),
+                format='eps')
