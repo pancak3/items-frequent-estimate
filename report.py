@@ -12,12 +12,13 @@ from pprint import pprint
 
 
 class Result:
-    def __init__(self, time_cost, mem_cost, res, baseline_res):
+    def __init__(self, time_cost, counters_count, res, baseline_res):
         self.time_cost = time_cost
-        self.mem_cost = mem_cost
+        self.counters_count = counters_count
 
         estimate, actual = set(res[0]), set(baseline_res[0])
         self.precision = len(estimate.intersection(actual)) / len(estimate)
+        self.accuracy = len(estimate.intersection(actual)) / len(estimate.union(actual))
 
 
 def mem(garbage_collection=False):
@@ -33,7 +34,6 @@ def test(z: float, distinct_nums: int, s: float, d: float, stream_size: int):
     e = s / 10
 
     start_time = time()
-    start_mem = mem(garbage_collection=False)
     baseline_ = Baseline()
     for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
         baseline_.feed(num)
@@ -41,40 +41,37 @@ def test(z: float, distinct_nums: int, s: float, d: float, stream_size: int):
     baseline_res = baseline_.request(s)
 
     baseline_res_ = Result(time() - start_time,
-                           mem() - start_mem,
+                           len(baseline_.counter),
                            baseline_res,
                            baseline_res)
     pprint(vars(baseline_res_))
 
     start_time = time()
-    start_mem = mem(garbage_collection=False)
     sticky_sampling_ = StickySampling(s=s, e=e, d=d)
     for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
         sticky_sampling_.feed(num)
     sticky_sampling_res = Result(time() - start_time,
-                                 mem() - start_mem,
+                                 len(sticky_sampling_.S),
                                  sticky_sampling_.request(),
                                  baseline_res)
     pprint(vars(sticky_sampling_res))
 
     start_time = time()
-    start_mem = mem(garbage_collection=False)
     lossy_counting_ = LossyCounting(s=s, e=e)
     for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
         lossy_counting_.feed(num)
     lossy_counting_res = Result(time() - start_time,
-                                mem() - start_mem,
+                                len(lossy_counting_.D),
                                 lossy_counting_.request(),
                                 baseline_res)
     pprint(vars(lossy_counting_res))
 
     start_time = time()
-    start_mem = mem(garbage_collection=False)
-    space_sampling_ = SpaceSaving(1 / s)
-    for num in tqdm.tqdm(zipf.stream, desc="SpaceSampling"):
+    space_sampling_ = SpaceSaving(10)
+    for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
         space_sampling_.feed(num)
     space_sampling_res = Result(time() - start_time,
-                                mem() - start_mem,
+                                len(space_sampling_.C),
                                 space_sampling_.request(),
                                 baseline_res)
     pprint(vars(space_sampling_res))
@@ -89,6 +86,6 @@ def power_law():
 
 
 def run():
-    # test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=10000000)
+    test(z=2.0, distinct_nums=100, s=0.0001, d=0.01, stream_size=1000000)
 
-    power_law()
+    # power_law()

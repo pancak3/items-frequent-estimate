@@ -32,10 +32,10 @@ class StickySampling:
                     #  diminishing by one for every unsuccessful outcome
                     coin = random.randint(0, 1)
                     entry.f -= 1
-                # if f becomes during this process, we delete the entry from S
+                # if f becomes 0 during this process, we delete the entry from S
                 if entry.f > 0:
                     S[entry.e] = entry
-
+            self.S = S
             self.r = rate
         return self.r
 

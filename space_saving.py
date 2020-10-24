@@ -19,6 +19,7 @@ class SpaceSaving:
     def sort_entries(self):
         self.SortedC = self.C.values()
         sorted(self.SortedC, key=lambda x: x.f)
+        self.SortedC = list(self.SortedC)
 
     def feed(self, x):
         if x in self.C:
