@@ -138,10 +138,11 @@ Its memory cost is $O(n)$ since it stores every distinct items. And accuracy is 
 \paragraph{StickySampling}
 In a power-law distribution data stream, the probability of occurrences drop rapidly at the begaining 
 of the increasing order. In this kind of distribution, StickySampling algorithm works. 
-Because items with high probability tends to appear earlier when the rate to be selected is higher.
-Thus, they accumulate higher frequencies to against frequency diminising at the timepoint of rate changing.
-But items with lower probabilities have higher chance to be evicted at the moment.
-As the algorithm processing, items with higher probabilities are kept.
+This is because items with high probabilities tendd to appear earlier when the chance ($1/t$) to be selected is higher ($t$ increases thus $1/t$ drops).
+After be selected, they also appears more. Thus, they accumulate higher frequencies to against frequency diminising at the timepoint of rate changing.
+But items with lower probabilities have lower chance to be selected. 
+Even they are selected, they have higher chance to be evicted at the diminising moment.
+As the algorithm processing, items with higher probabilities are finally kept.
 
 The memory cost of StockySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ? 
 ($\epsilon{}$ is chosen to be $s/10$ and $\delta{}$ is chosen to be 0.01).
