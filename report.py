@@ -175,9 +175,9 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     ax = max_tracked_vs_runtime.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
     runtime_vs_support.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
     ax.set_xlabel(r'Runtime')
-    ax.set_ylabel(r'Max Tracked Items')
+    ax.set_ylabel(r'Maximum Number of Tracked Items')
     plt.legend()
-    plt.title(r'Max Tracked Items vs Runtime')
+    plt.title(r'Maximum Number of Tracked Items vs Runtime')
     plt.show()
     ax.get_figure().savefig(
         'report/eps/MaxTracked-Runtime-zipf-{}-{}-delta-{}-stream-{}.eps'.format(z, distinct_nums, d, stream_size),
