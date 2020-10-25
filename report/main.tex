@@ -156,6 +156,26 @@ Its update time is then $O(\frac{1}{\epsilon}log(\epsilon{}N))$ because it itera
 SpaceSaving has a fixed number of counters which is $m = 1/s$, so its memory cost is $O(1/s)$. 
 And the update time is $O(log(1/s))$ because the QuickSort is used when updates.
 
+\section{Results \& Analysis}
+
+\subsection{Support}
+
+\begin{figure}
+      \begin{subfigure}[b]{0.5\textwidth}
+           \centering
+           \resizebox{\linewidth}{!}{\includegraphics{eps/MaxTracked-Support-zipf-2.0-1000-delta-0.01-stream-1000000.eps}}
+           \caption{Maximum Number of Tracked Items vs Support}
+           \label{MaxTracked-Support}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.5\textwidth}
+           \centering
+           \resizebox{\linewidth}{!}{\includegraphics{eps/Runtime-Support-zipf-2.0-1000-delta-0.01-stream-1000000.eps}}
+            \caption{Runtime vs Support}
+           \label{Runtime-Support}
+     \end{subfigure}
+     \label{support}
+ \end{figure}
+
 \bibliographystyle{IEEEtran}
 \bibliography{main}
 \end{document}

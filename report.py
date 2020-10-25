@@ -40,12 +40,12 @@ def mem(garbage_collection=False):
 
 
 def test(zipf: Zipf, s: float, d: float):
-
     e = s / 10
 
     start_time = time()
     baseline_ = Baseline()
-    for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
+    # for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
+    for num in zipf.stream:
         baseline_.feed(num)
 
     baseline_res_ = baseline_.request(s)
@@ -59,7 +59,8 @@ def test(zipf: Zipf, s: float, d: float):
 
     start_time = time()
     sticky_sampling_ = StickySampling(s=s, e=e, d=d)
-    for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
+    # for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
+    for num in zipf.stream:
         sticky_sampling_.feed(num)
     sticky_sampling_res = Result("StickySampling",
                                  len(sticky_sampling_.S),
@@ -70,7 +71,8 @@ def test(zipf: Zipf, s: float, d: float):
 
     start_time = time()
     lossy_counting_ = LossyCounting(s=s, e=e)
-    for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
+    # for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
+    for num in zipf.stream:
         lossy_counting_.feed(num)
     lossy_counting_res = Result("LossyCounting",
                                 len(lossy_counting_.D),
@@ -81,7 +83,8 @@ def test(zipf: Zipf, s: float, d: float):
 
     start_time = time()
     space_sampling_ = SpaceSaving(1 / s)
-    for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
+    # for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
+    for num in zipf.stream:
         space_sampling_.feed(num)
     space_sampling_res = Result("SpaceSaving",
                                 len(space_sampling_.C),
@@ -107,7 +110,6 @@ def power_law(distinct_nums: int, stream_size: int):
 
 
 def support(low: float, high: float, size: int, z: float, distinct_nums: int, d: float, stream_size: int):
-
     max_tracked_vs_support = DataFrame(data=[],
                                        index=["Baseline", "StickySampling",
                                               "LossyCounting", "SpaceSaving"])
@@ -123,7 +125,7 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     ss = np.linspace(low, high, size, endpoint=True)
     zipf = Zipf(z, distinct_nums)
     zipf.proof(stream_size, draw=False)
-    for s in tqdm.tqdm(range(ss), desc="Supports"):
+    for s in tqdm.tqdm(ss, desc="Supports"):
         df = test(zipf=zipf, s=s, d=d)
         max_tracked_vs_support[str(s)] = list(df["max_tracked"])
         runtime_vs_support[str(s)] = list(df["time_cost"])
@@ -132,9 +134,6 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
             for i, time_cost in enumerate(runtime_vs_support.T[algorithm_name]):
                 max_tracked_vs_runtime[algorithm_name][time_cost] = max_tracked[i]
     max_tracked_vs_runtime = DataFrame(max_tracked_vs_runtime).sort_index()
-    print(max_tracked_vs_support.T)
-    print(runtime_vs_support.T)
-    print(max_tracked_vs_runtime)
 
     max_tracked_vs_support = max_tracked_vs_support.T
     indexes = [float(i) for i in max_tracked_vs_support.index]
@@ -150,7 +149,7 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     plt.title(r'Maximum Number of Tracked Items vs Support')
     plt.show()
     ax.get_figure().savefig(
-        'report/eps/MaxTracked-Support-zipf-{}-{}-delta-{}-stream-{}-.eps'.format(z, distinct_nums, d, stream_size),
+        'report/eps/MaxTracked-Support-zipf-{}-{}-delta-{}-stream-{}.eps'.format(z, distinct_nums, d, stream_size),
         format='eps')
 
     runtime_vs_support = runtime_vs_support.T
@@ -167,16 +166,34 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     plt.title(r'Runtime vs Support')
     plt.show()
     ax.get_figure().savefig(
-        'report/eps/Runtime-Support-zipf-{}-{}-delta-{}-stream-{}-.eps'.format(z, distinct_nums, d, stream_size),
+        'report/eps/Runtime-Support-zipf-{}-{}-delta-{}-stream-{}.eps'.format(z, distinct_nums, d, stream_size),
         format='eps')
+
+    plt.figure()
+    ax = max_tracked_vs_runtime.Baseline.plot(label="Baseline", style='_-', legend=True)
+    ax = max_tracked_vs_runtime.StickySampling.plot(label="StickySampling", style='1-', legend=True)
+    ax = max_tracked_vs_runtime.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
+    runtime_vs_support.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
+    ax.set_xlabel(r'Runtime')
+    ax.set_ylabel(r'Max Tracked Items')
+    plt.legend()
+    plt.title(r'Max Tracked Items vs Runtime')
+    plt.show()
+    ax.get_figure().savefig(
+        'report/eps/MaxTracked-Runtime-zipf-{}-{}-delta-{}-stream-{}.eps'.format(z, distinct_nums, d, stream_size),
+        format='eps')
+
+    print(max_tracked_vs_support)
+    print(runtime_vs_support)
+    print(max_tracked_vs_runtime)
 
 
 def run():
     z = 2.0
     distinct_nums = 1000
     d = 0.01
-    stream_size = 1000000
+    stream_size = 100000
 
-    power_law(distinct_nums=distinct_nums, stream_size=stream_size)
+    # power_law(distinct_nums=distinct_nums, stream_size=stream_size)
 
     support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
