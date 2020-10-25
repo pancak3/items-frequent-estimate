@@ -31,6 +31,23 @@ class Result:
         self.precision = tp / (tp + fp)
         self.accuracy = (tp + tn) / (tp + tn + fp + fn)
 
+        real_counts = {}
+        for i, item in enumerate(baseline_res[0]):
+            real_counts[item] = baseline_res[1][i]
+
+        estimate_counts = {}
+        for i, item in enumerate(res[0]):
+            estimate_counts[item] = res[1][i]
+
+        relative_err = 0
+        for i, x0 in enumerate(baseline_res[0]):
+            if i >= len(res[0]):
+                x1 = 0
+            else:
+                x1 = res[0][i]
+            relative_err += abs(x1 - x0) / x0
+        self.average_relative_error = relative_err / len(baseline_res[0])
+
 
 def mem(garbage_collection=False):
     if garbage_collection:
@@ -170,11 +187,11 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
         format='eps')
 
     plt.figure()
-    ax = max_tracked_vs_runtime.Baseline.plot(label="Baseline", style='_-', legend=True)
-    ax = max_tracked_vs_runtime.StickySampling.plot(label="StickySampling", style='1-', legend=True)
-    ax = max_tracked_vs_runtime.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
-    runtime_vs_support.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
-    ax.set_xlabel(r'Runtime')
+    ax = max_tracked_vs_runtime.Baseline.plot(label="Baseline", style='_', legend=True)
+    ax = max_tracked_vs_runtime.StickySampling.plot(label="StickySampling", style='1', legend=True)
+    ax = max_tracked_vs_runtime.LossyCounting.plot(label="LossyCounting", style='|', legend=True)
+    max_tracked_vs_runtime.SpaceSaving.plot(label="SpaceSaving", style='.', legend=True)
+    ax.set_xlabel(r'Runtime (Micro Seconds)')
     ax.set_ylabel(r'Maximum Number of Tracked Items')
     plt.legend()
     plt.title(r'Maximum Number of Tracked Items vs Runtime')
@@ -188,12 +205,74 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     print(max_tracked_vs_runtime)
 
 
+def average_relative_error(low: float, high: float, size: int, z: float, distinct_nums: int, d: float,
+                           stream_size: int):
+    df_average_relative_err = DataFrame(data=[], index=["StickySampling", "LossyCounting", "SpaceSaving"])
+
+    ss = np.linspace(low, high, size, endpoint=True)
+    zipf = Zipf(z, distinct_nums)
+    zipf.proof(stream_size, draw=False)
+
+    def calc_relative_err(res, real_):
+        s_ = 0
+        for i, item in enumerate(res[0]):
+            s_ += abs(res[1][i] - real_[item]) / real_[item]
+        return s_ / len(res[0])
+
+    baseline_ = Baseline()
+    for num in zipf.stream:
+        baseline_.feed(num)
+    real_res = baseline_.request(0)
+    real_counts = {}
+    for i, item in enumerate(real_res[0]):
+        real_counts[item] = real_res[1][i]
+
+    for s in tqdm.tqdm(ss, desc="AverageRelative-Supports"):
+        sticky_sampling_ = StickySampling(s=s, e=s / 10, d=d)
+        lossy_counting_ = LossyCounting(s=s, e=s / 10)
+        space_sampling_ = SpaceSaving(1 / s)
+
+        for num in zipf.stream:
+            sticky_sampling_.feed(num)
+            lossy_counting_.feed(num)
+            space_sampling_.feed(num)
+
+        sticky_sampling_res = sticky_sampling_.request()
+        lossy_counting_res = lossy_counting_.request()
+        space_sampling_res = space_sampling_.request()
+
+        sticky_sampling_average_relative_err = calc_relative_err(sticky_sampling_res, real_counts)
+        lossy_counting_average_relative_err = calc_relative_err(lossy_counting_res, real_counts)
+        space_sampling_average_relative_err = calc_relative_err(space_sampling_res, real_counts)
+
+        df_average_relative_err[s] = [sticky_sampling_average_relative_err, lossy_counting_average_relative_err,
+                                      space_sampling_average_relative_err]
+
+    df_average_relative_err = df_average_relative_err.T
+    plt.figure()
+    ax = df_average_relative_err.StickySampling.plot(label="StickySampling", style='1-', legend=True)
+    ax = df_average_relative_err.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
+    ax2 = df_average_relative_err.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True, secondary_y=True)
+    ax.set_xlabel(r'Support $s$ ')
+    ax.set_ylabel(r'Average Relative Error')
+    ax2.set_ylabel(r'Average Relative Error of SpaceSaving')
+    # plt.legend()
+    plt.title(r'Average Relative Error vs Support')
+    plt.show()
+    ax.get_figure().savefig(
+        'report/eps/AverageRelativeError-Support-zipf-{}-{}-delta-{}-stream-{}.eps'.format(z, distinct_nums, d,
+                                                                                           stream_size),
+        format='eps')
+
+
 def run():
     z = 2.0
-    distinct_nums = 1000
+    distinct_nums = 10000
     d = 0.01
     stream_size = 100000
 
     # power_law(distinct_nums=distinct_nums, stream_size=stream_size)
-
+    #
     support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
+    # average_relative_error(low=0.00001, high=0.0125, size=100, z=z, distinct_nums=distinct_nums, d=d,
+    #                        stream_size=stream_size)

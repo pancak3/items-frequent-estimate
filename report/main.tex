@@ -62,6 +62,9 @@ The testing operating system is macOS Catalina version 10.15.7 (19H2).
 All the algorithms are implemented in Python 3.8.5.
 The requirements of the algorithms are stored in requirements.txt which can be installed with command pip install -r requirements.txt.
 
+\paragraph{Repeat Tests}
+Once the environments are prepared, run python3 main.py to get all the figures in this report.
+
 \paragraph{Data Stream}
 The data stream is power-law distribution where 
 the $i^{th}$ most frequent item has probability $\frac{1}{i^{z} \cdot{} Zeta(z)}$
@@ -73,7 +76,7 @@ Besides, as Figure~\ref{powerlaw} annotates, there are $717130$ items has freque
 $819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
 
 
-\begin{figure}
+\begin{figure}[!t]
      \begin{subfigure}[b]{0.5\textwidth}
           \centering
           \resizebox{\linewidth}{!}{\includegraphics{eps/zipf-1.1-100-stream-1000000.eps}}
@@ -144,11 +147,11 @@ But items with lower probabilities have lower chance to be selected.
 Even they are selected, they have higher chance to be evicted at the diminising moment.
 As the algorithm processing, items with higher probabilities are finally kept.
 
-The memory cost of StockySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ? 
+The memory cost of StickySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ? 
 ($\epsilon{}$ is chosen to be $s/10$ and $\delta{}$ is chosen to be 0.01).
 Its update time is also $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ because the counters are iterated when the rate $r$ changes.
 \paragraph{LossyCounting}
-The memory cost of StockySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$ 
+The memory cost of StickySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$ 
 % because the chance of removing counter decreases as items coming when the items distribution is power-law, i.e., 
 % new items have decresing chances to remove a counter at boundaries.
 Its update time is then $O(\frac{1}{\epsilon}log(\epsilon{}N))$ because it iterates all counters at boundaries.
@@ -158,22 +161,66 @@ And the update time is $O(log(1/s))$ because the QuickSort is used when updates.
 
 \section{Results \& Analysis}
 
-\subsection{Support}
+\subsection{Memory \& Runtime \& Support}
+Support $s$ from $10^{-5}$ to $10^{-2}$ were tested for the three algorithms and also Baseline,
+see Figure~\ref{RuntimeSupport}.
+Figure~\ref{MemoryRuntimeSupport} shows memory vs support. 
+The maximum number of tracked items is used to present memory of the algorithms.
+Figure~\ref{MaxTrackedSupport} shows runtime vs support.
+Finally, Figure~\ref{MaxTrackedRuntime} shows memory vs runtime 
+where the data is from the tests Figure~\ref{MaxTrackedSupport} and \ref{RuntimeSupport}.
 
-\begin{figure}
+\begin{figure}[!t]
+      \centering
       \begin{subfigure}[b]{0.5\textwidth}
-           \centering
-           \resizebox{\linewidth}{!}{\includegraphics{eps/MaxTracked-Support-zipf-2.0-1000-delta-0.01-stream-1000000.eps}}
+          \centering
+           \resizebox{\linewidth}{!}{\includegraphics{eps/MaxTracked-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}}
            \caption{Maximum Number of Tracked Items vs Support}
-           \label{MaxTracked-Support}
+           \label{MaxTrackedSupport}
      \end{subfigure}
+
      \begin{subfigure}[b]{0.5\textwidth}
-           \centering
-           \resizebox{\linewidth}{!}{\includegraphics{eps/Runtime-Support-zipf-2.0-1000-delta-0.01-stream-1000000.eps}}
+            \centering
+           \resizebox{\linewidth}{!}{\includegraphics{eps/Runtime-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}}
             \caption{Runtime vs Support}
-           \label{Runtime-Support}
+           \label{RuntimeSupport}
      \end{subfigure}
-     \label{support}
+     
+     \begin{subfigure}[b]{0.5\textwidth}
+            \centering
+            \resizebox{\linewidth}{!}{\includegraphics{eps/MaxTracked-Runtime-zipf-2.0-10000-delta-0.01-stream-100000.eps}}
+            \caption{Maximum Number of Tracked Items vs Runtime}
+            \label{MaxTrackedRuntime}
+      \end{subfigure}
+     \caption{Memory \& Runtime \& Support; $z=2.0$, $10^{4}$ distinct items and $10^{5}$ items in stream.}  
+      \label{MemoryRuntimeSupport}
+ \end{figure}
+
+ Figure~\ref{MaxTrackedSupport} indicates that they all have fixed memory .
+ Because as the items coming, they store most of the items that have high probabilities.
+But for SpaceSaving, the fixed memory is $1/s$, so it drops when $s$ increases. 
+Thus, it cannot store the most frequent items at some point. 
+
+Figure~\ref{RuntimeSupport} indicates that SpaceSaving has a increaing trend of runtime when
+support increases. This is because it has more counters to sort when $s$ is greater.
+However, runtime of StickySampling and LossyCounting do not change much.
+This can be explained by the update time row of Table~\ref{theoretical_performance}.
+As Table~\ref{theoretical_performance} shows, the increament of $s$ does not 
+affect runtime of StickySampling much. And for LossyCounting, stream size $N$
+affects much more than $s$. In addition, runtime of StickySampling and SpaceSaving are not affected by $N$, 
+LossyCounting has higher runtime than them.
+
+\subsection{Average Relative Error vs Support}
+Figure~\ref{AverageRelativeErrorSupport} shows the average relative error of StickySampling, LossyCounting and SpaceSaving.
+
+ \begin{figure}
+      \centering
+     \begin{subfigure}[b]{0.8\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{\includegraphics{eps/AverageRelativeError-Support-zipf-2.0-100-delta-0.01-stream-100000.eps}} 
+      \end{subfigure}
+      \caption{Average Relative Error vs Support}  
+      \label{AverageRelativeErrorSupport}
  \end{figure}
 
 \bibliographystyle{IEEEtran}
