@@ -54,12 +54,12 @@ Section~\ref{implementations} presents the implementations of algorithms
 and the theoretical performance of them.
 Section~\ref{resultsanalysis} provides results and analysis. 
 Finally, Section~\ref{conclusion} concludes this report,
-gives recommandations and lists possible further improvements. 
+gives recommendations and lists possible further improvements. 
 
 \section{Hardware \& Environments \& Data Stream}\label{preparation}
 
 \paragraph{Hardware}
-The experiments in section are conducted on a machin with the following specifications,
+The experiments in section are conducted on a machine with the following specifications,
 \begin{itemize}
      \setlength\itemsep{1pt}
        \item CPU: 1.8 GHz Quad-Core Intel Core i5
@@ -78,8 +78,8 @@ Once the environments are prepared, run \texttt{python3 main.py} under the sourc
 The data stream is power-law distribution where 
 the $i^{th}$ most frequent item has probability $\frac{1}{i^{z} \cdot{} Zeta(z)}$
 where $z$ is a positive real-value parameter and $Zeta$ is \texttt{Riemann or Hurwitz zeta function} \cite{zeta}. 
-Figure~\ref{powerlaw} shows the distribution when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
-As it shows, they have almost the ideal trend except when $z$ is close to 1. 
+Figure~\ref{powerlaw} shows the distributions when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
+As it shows, they have almost the ideal trend except for when $z$ is close to 1. 
 This proves that data streams in this report are desired.
 Besides, as Figure~\ref{powerlaw} annotates, there are $717130$ items has frequency at least 1\% when $z=1.1$,  
 $819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
@@ -118,47 +118,45 @@ $819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
 % If $x$ is not in $C$ , set $C_n$ to $<x, 1>$. Otherwise, increment $C_x$ to $<x, f+1>$.
 % When user requests with support $s$, return the entries with $f$ greater than $f\cdot{}N$.
 \paragraph{StickySampling \& LossyCounting \& SpaceSaving}
-These three algorithms are implemented following the respective papers \cite{spacesaving,spacesaving}.
-
+These three algorithms are implemented following the respective papers \cite{stickylossy,spacesaving}. 
 The theoretical performance of them should be what Table~\ref{theoretical_performance} shows.
 
 \subsection{Theoretical Performance \& Justification}
 \begin{table}[H]
      \centering
-      \begin{tabular}{||c | c | c| c| c||} 
+      \begin{tabular}{|| c | c| c| c||} 
       \hline
-      & Baseline & StickySampling & LossyCounting & SpaceSaving \\ [0.5ex] 
+       & StickySampling & LossyCounting & SpaceSaving \\ [0.5ex] 
       \hline\hline
-      Update Time & $O(1)$ &  $O(20s^{-1}log(100s^{-1}))$ & $O(10s^{-1}log(10^{-1}sN))$ & $O(log(s^{-1}))$ \\
+      Update Time  &  $O(20s^{-1}log(100s^{-1}))$ & $O(10s^{-1}log(10^{-1}sN))$ & $O(log(s^{-1}))$ \\
       \hline
-      Memory & $O(n)$ & $O(20s^{-1}(log100s^{-1}))$ & $O(10s^{-1}log(10^{-1}sN))$& $O(s^{-1})$ \\ 
+      Memory & $O(20s^{-1}(log100s^{-1}))$ & $O(10s^{-1}log(10^{-1}sN))$& $O(s^{-1})$ \\ 
       \hline
-      Accuracy & 100\% & $O(s^{-1}N)$ & $O(s^{-1}N)$ & $O(ms^{-1})$ \\
+      Accuracy & $O(s)$ & $O(s)$ & $O(s)$ \\
       \hline
       \end{tabular}
-     \caption{Theoretical performance of Baseline, StickySampling, LossyCounting and SpaceSaving;
+     \caption{Theoretical performance of, StickySampling, LossyCounting and SpaceSaving;
       $s$ is support, $N$ is the current lenth of the stream and
       $n$ is the number of distinct items in stream.}
       \label{theoretical_performance}
 \end{table}
 
-\paragraph{Baseline}
-The update time of Baseline is $O(1)$ because it just increament the corresponding $f$ with no other operation when updates.
-Its memory cost is $O(n)$ since it stores every distinct items. And accuracy is 100\% obviously.
+% \paragraph{Baseline}
+% The update time of Baseline is $O(1)$ because it just increments the corresponding $f$ with no other operation when updates.
+% Its memory cost is $O(n)$ since it stores every distinct item. And accuracy is 100\% obviously.
 \paragraph{StickySampling}
-In a power-law distribution data stream, the probability of occurrences drop rapidly at the begaining 
-of the increasing order. In this kind of distribution, StickySampling algorithm works. 
-This is because items with high probabilities tendd to appear earlier when the chance ($1/t$) to be selected is higher ($t$ increases thus $1/t$ drops).
-After be selected, they also appears more. Thus, they accumulate higher frequencies to against frequency diminising at the timepoint of rate changing.
-But items with lower probabilities have lower chance to be selected. 
-Even they are selected, they have higher chance to be evicted at the diminising moment.
+In a power-law distribution data stream, the probability of occurrences drops rapidly at the beginning of the increasing order. In this kind of distribution, StickySampling algorithm works. 
+This is because items with high probabilities tend to appear earlier when the chance ($1/t$) to be selected is higher ($t$ increases thus $1/t$ drops).
+After being selected, they also appear more frequently. Thus, they accumulate higher frequencies to against frequency diminishing at the timepoint of rate changing.
+However, items with lower probabilities have a lower chance to be selected. 
+Even they are selected, they have a higher chance to be evicted at the diminishing moment.
 As the algorithm processing, items with higher probabilities are finally kept.
 
 The memory cost of StickySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ \cite{stickylossy}
 ($\epsilon{}$ is chosen to be $s/10$ and $\delta{}$ is chosen to be 0.01).
 Its update time is also $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ because the counters are iterated when the rate $r$ changes.
 \paragraph{LossyCounting}
-The memory cost of StickySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$ 
+The memory cost of StickySampling is $O(\frac{1}{\epsilon}log(\epsilon{}N))$. 
 % because the chance of removing counter decreases as items coming when the items distribution is power-law, i.e., 
 % new items have decresing chances to remove a counter at boundaries.
 Its update time is then $O(\frac{1}{\epsilon}log(\epsilon{}N))$ because it iterates all counters at boundaries.
@@ -197,22 +195,21 @@ where the data is from the tests Figure~\ref{MaxTrackedSupport} and \ref{Runtime
         \label{MaxTrackedRuntime}
       \end{minipage}
 \end{figure}
- Figure~\ref{MaxTrackedSupport} indicates that they all have fixed memory .
- Because as the items coming, they store most of the items that have high probabilities.
+Figure~\ref{MaxTrackedSupport} indicates that they all have a fixed memory.
+Because as the items coming, they store most of the items that have high probabilities.
 But for SpaceSaving, the fixed memory is $1/s$, so it drops when $s$ increases. 
 Thus, it cannot store the most frequent items at some point. 
 
-Figure~\ref{RuntimeSupport} indicates that SpaceSaving has a increaing trend of runtime when
+Figure~\ref{RuntimeSupport} indicates that SpaceSaving has an increasing trend of runtime when
 support increases. This is because it has more counters to sort when $s$ is greater.
-However, runtime of StickySampling and LossyCounting do not change much.
+However, the runtime of StickySampling and LossyCounting do not change much.
 This can be explained by the update time row of Table~\ref{theoretical_performance}.
-As Table~\ref{theoretical_performance} shows, the increament of $s$ does not 
-affect runtime of StickySampling much. And for LossyCounting, stream size $N$
-affects much more than $s$. In addition, runtime of StickySampling and SpaceSaving are not affected by $N$, 
+As Table~\ref{theoretical_performance} shows, the increment of $s$ does not affect the runtime of StickySampling much. And for LossyCounting, stream size $N$
+affects much more than $s$. In addition, the runtime of StickySampling and SpaceSaving are not affected by $N$, 
 LossyCounting has higher runtime than them.
 
 Figure~\ref{MaxTrackedRuntime} indicates that memory of StickySampling and LossyCounting
-do not have correlation with the runtime. 
+do not have a correlation with the runtime. 
 
 \subsection{Precision \& Runtime \& Skew}
 
@@ -235,10 +232,10 @@ Figure~\ref{PrecisionSkew} indicates that
 StickySampling always has precision close to 1 no matter how the 
 stream distribution varies. 
 Besides, LossyCounting also has a similar precision but is less stable.
-On the contratry, SpaceSaving has much lower precision but the precision
+On the contrary, SpaceSaving has much lower precision but the precision
 increases as $z$ increasing.
 
-Figure~\ref{RuntimeSkew} indicates that all the three algorithms run faster
+Figure~\ref{RuntimeSkew} indicates that all three algorithms run faster
 when $z$ is greater. This is because counters evicting happens less
 when new items appear less in such distributions. 
 The figure also shows that, when $z$ is big enough, SpaceSaving is faster than StickySampling, 
@@ -260,38 +257,36 @@ Figure~\ref{AverageRelativeErrorSupport} shows the average relative error of Sti
       \caption{Average Relative Error vs Support; $z$ = 2.0, $10^2$ distinct items and $10^5$ items in stream.}  
       \label{AverageRelativeErrorSupport}
  \end{figure}
-It indicates that 
- LossyCounting always record the right count of an item.
- SpaceSaving also record the right count when $s$ is proper. 
+ It indicates that 
+ LossyCounting always records the right count of an item.
+ SpaceSaving also records the right count when $s$ is proper. 
  When $s$ is greater than some value, its estimates become worse.
- StickySampling has an logarithmic trend of the average relative error.
- This is because the higher $s$ is, the less counters it has. 
- Thus, average relative error becomes smaller.
+ StickySampling has a logarithmic trend of the average relative error.
+ This is because the higher $s$ is, the fewer counters it has 
+ and it is a logarithmic formula which can be seen in Table~\ref{theoretical_performance}. 
+ Thus, the average relative error becomes smaller.
 
  \section{Conclusion}\label{conclusion}
- In practice, unexcepted situation always happens. 
+ In practice, unexpected situations always happen. 
  For example, in \cite{stickylossy}, LossyCounting is said to be better than StickySampling in practice,
  however, in the practice of this report, LossyCounting is worse than StickySampling both in practice and theoretically.
  This may because $\epsilon{} = s/10$ in this report but \cite{stickylossy} dose not. 
- Better performance of LossyCounting may be achieve by trying different $\epsilon$.
+ Better performance of LossyCounting may be achieved by trying different $\epsilon$.
  Furthermore, the runtime tests on the three algorithms sometimes vary a lot even on the same data stream.
  This is because the computing resources of an operating system vary even during a short period of time.
 
  StickySampling, LossyCounting and SpaceSaving are investigated in this report and
  they all have different merits and shortcomings. 
- If the number of distinct items is known(estimable) and the space is very lacked,
- SpaceSaving is the best choice since it uses few space and has better performance with proper number of fixed counters.
- Otherwise, if the number is invisible, LossyCounting gives a very high and stable precision but it is little slower 
- than StickySampling and also uses more space. If one prefers a stable precision and 
+ If the number of distinct items is known(estimable) and space is very lacked,
+ SpaceSaving is the best choice since it uses a few spaces and has better performance with the proper number of fixed counters.
+ Otherwise, if the number is invisible, LossyCounting gives a very high and stable precision but it is a little slower than StickySampling and also uses more space. If one prefers a stable precision and 
  does not mind the runtime and space difference, LossyCounting is a better choice than StickySampling.
 
- The following three possible improvements of this report. 
- The first, the tests, comparasion and analysis of the three algoritms against 
- Baseline can be made.
+ There are three possible improvements of this report. 
+ The first, the tests, comparisons and analysis of the three algorithms against a baseline can be made.
  The second, all the tests should be taken multiple times on the same machine.
- During the testing, the operating system should not have other computing tasks to avoid resources competion.
- The last, large numbers of distinct items in stream should be tested to presents the 
- outstanding performance of SpaceSaving. This is not tested because the testing machine does not has high performance.
+ During the testing, the operating system should not have other computing tasks to avoid resources competition.
+ The last, large numbers of distinct items in the stream should be tested to presents the outstanding performance of SpaceSaving. This is not tested because the testing machine does not have high performance.
   
  \clearpage
 \bibliographystyle{IEEEtran}
