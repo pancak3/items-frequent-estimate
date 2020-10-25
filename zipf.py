@@ -83,6 +83,10 @@ class Zipf:
         self.df = df
 
         if draw:
+            title_log = '[*] Power-law Distribution; $z = {}$, {} items'.format(self.z, sci(stream_size))
+            print(title_log)
+            print(df)
+
             greater = df["count"][df["prob"] >= .01].sum()
             plt.figure()
             ax = df.theory.plot(label="In Theory", style='.', logy=True, legend=True)
@@ -97,3 +101,4 @@ class Zipf:
             ax.get_figure().savefig(
                 'report/eps/zipf-{}-{}-stream-{}.eps'.format(self.z, self.distinct_nums, stream_size),
                 format='eps')
+

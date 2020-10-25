@@ -258,6 +258,8 @@ def average_relative_error(low: float, high: float, size: int, z: float, distinc
                                       space_sampling_average_relative_err]
 
     df_average_relative_err = df_average_relative_err.T
+    print('Average Relative Error vs Support')
+    print(df_average_relative_err)
     plt.figure()
     ax = df_average_relative_err.StickySampling.plot(label="StickySampling", style='1-', legend=True)
     ax = df_average_relative_err.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
@@ -359,7 +361,18 @@ def precision_runtime_vs_z(repeat: int, low: float, high: float, size: int, s: f
     precision_vs_skew = precision_vs_skew.div(repeat)
     runtime_vs_skew = runtime_vs_skew.div(repeat)
 
+    if repeat > 1:
+        title_log = '[*] Average Precision vs Skew $z$; $s={}$'.format(s)
+    else:
+        title_log = '[*] Precision vs Skew $z$; $s={}$'.format(s)
+    print(title_log)
     print(precision_vs_skew)
+
+    if repeat > 1:
+        title_log = '[*] Average Precision vs Skew $z$; $s={}$'.format(s)
+    else:
+        title_log = '[*] Precision vs Skew $z$; $s={}$'.format(s)
+    print(title_log)
     print(runtime_vs_skew)
 
     plt.figure()
@@ -410,7 +423,10 @@ def run():
                            distinct_nums=1000,
                            stream_size=100000)
 
-    support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
+    support(low=0.00001, high=0.01, size=100, z=z,
+            distinct_nums=10000, d=d,
+            stream_size=100000)
+
     average_relative_error(low=0.00001, high=0.0125, size=100,
                            z=z,
                            distinct_nums=100,
