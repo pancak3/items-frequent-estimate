@@ -43,11 +43,19 @@
 
 \section{Introduction}
 Three algorithms are implemented in this report to estimate the most frequent items of a data stream.
-They are StickySampling, LossyCounting and SpaceSaving. 
+They are StickySampling \cite{stickylossy}, LossyCounting \cite{stickylossy} and SpaceSaving \cite{spacesaving}. 
 There is also a Baseline algorithm implemented to investigate the performance of the three algorithms.
-Results of experiments are provided in Section? which show ? 
 
-\section{Hardware \& Environments \& Data Stream}
+The structure of this report is as follows. 
+Section~\ref{preparation} introduces the set-up including hardware, operating system, environments 
+and data stream preparation.
+Section~\ref{implementations} presents the implementations of algorithms 
+and the theoretical performance of them.
+Section~\ref{resultsanalysis} provides results and analysis. 
+Finally, Section~\ref{conclusion} concludes this report,
+gives recommandations and lists possible further improvements. 
+
+\section{Hardware \& Environments \& Data Stream}\label{preparation}
 
 \paragraph{Hardware}
 The experiments in section are conducted on a machin with the following specs
@@ -68,7 +76,7 @@ Once the environments are prepared, run python3 main.py to get all the figures i
 \paragraph{Data Stream}
 The data stream is power-law distribution where 
 the $i^{th}$ most frequent item has probability $\frac{1}{i^{z} \cdot{} Zeta(z)}$
-where $z$ is a positive real-value parameter and $Zeta$ is Riemann or Hurwitz zeta function ?. 
+where $z$ is a positive real-value parameter and $Zeta$ is Riemann or Hurwitz zeta function \cite{zeta}. 
 Figure~\ref{powerlaw} shows the distribution when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
 As it shows, they have almost the ideal trend except when $z$ is close to 1. 
 This proves that data streams in this report are desired.
@@ -98,18 +106,18 @@ $819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
           \label{power-law-z-2.0-100-stream-1000000}
     \end{subfigure}
  
-    \caption{Power-law distribution with $z = \{1.1, 1.4, 1.7, 2.0\}$ and data stream size $10^6$}
+    \caption{Power-law distribution with $z = \{1.1, 1.4, 1.7, 2.0\}$ , $10^2$ distinct items and $10^6$ items in stream.}
     \label{powerlaw}
 \end{figure}
 
-\section{Implementations}
+\section{Implementations}\label{implementations}
 \paragraph{Baseline}
 Baseline algorithm is simple to implement. The algorithm holds counters $C$.
 The $i^{th}$ item $x$ in data stream with $N$ items is called entry $<x, f>$. 
 If $x$ is not in $C$ , set $C_n$ to $<x, 1>$. Otherwise, increment $C_x$ to $<x, f+1>$.
 When user requests with support $s$, return the entries with $f$ greater than $f\cdot{}N$.
 \paragraph{StickySampling \& LossyCounting \& SpaceSaving}
-These three algorithms are implemented following the respective papers.
+These three algorithms are implemented following the respective papers \cite{spacesaving,spacesaving}.
 
 The theoretical performance of them should be what Table~\ref{theoretical_performance} shows.
 
@@ -147,7 +155,7 @@ But items with lower probabilities have lower chance to be selected.
 Even they are selected, they have higher chance to be evicted at the diminising moment.
 As the algorithm processing, items with higher probabilities are finally kept.
 
-The memory cost of StickySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ ? 
+The memory cost of StickySampling is $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ \cite{stickylossy}
 ($\epsilon{}$ is chosen to be $s/10$ and $\delta{}$ is chosen to be 0.01).
 Its update time is also $O(\frac{2}{\epsilon}log(s^{-1}\delta^{-1})$ because the counters are iterated when the rate $r$ changes.
 \paragraph{LossyCounting}
@@ -159,43 +167,37 @@ Its update time is then $O(\frac{1}{\epsilon}log(\epsilon{}N))$ because it itera
 SpaceSaving has a fixed number of counters which is $m = 1/s$, so its memory cost is $O(1/s)$. 
 And the update time is $O(log(1/s))$ because the QuickSort is used when updates.
 
-\section{Results \& Analysis}
+\section{Results \& Analysis} \label{resultsanalysis}
 
 \subsection{Memory \& Runtime \& Support}
-Support $s$ from $10^{-5}$ to $10^{-2}$ were tested for the three algorithms and also Baseline,
-see Figure~\ref{RuntimeSupport}.
-Figure~\ref{MemoryRuntimeSupport} shows memory vs support. 
+Support $s$ from $10^{-5}$ to $10^{-2}$ were tested for the three algorithms and also Baseline.
+Figure~\ref{MaxTrackedSupport} shows memory vs support. 
 The maximum number of tracked items is used to present memory of the algorithms.
-Figure~\ref{MaxTrackedSupport} shows runtime vs support.
+Figure~\ref{RuntimeSupport} shows runtime vs support.
 Finally, Figure~\ref{MaxTrackedRuntime} shows memory vs runtime 
 where the data is from the tests Figure~\ref{MaxTrackedSupport} and \ref{RuntimeSupport}.
 
-\begin{figure}[!t]
+\begin{figure}[!htb]
+      \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=1\linewidth]{eps/MaxTracked-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}
+        \caption{Maximum Number of Tracked Items vs Support}
+        \label{MaxTrackedSupport}
+      \end{minipage}\hfill
+      \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=1\linewidth]{eps/Runtime-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}
+        \caption{Runtime vs Support}
+        \label{RuntimeSupport}
+      \end{minipage}
       \centering
-      \begin{subfigure}[b]{0.5\textwidth}
-          \centering
-           \resizebox{\linewidth}{!}{\includegraphics{eps/MaxTracked-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}}
-           \caption{Maximum Number of Tracked Items vs Support}
-           \label{MaxTrackedSupport}
-     \end{subfigure}
-
-     \begin{subfigure}[b]{0.5\textwidth}
-            \centering
-           \resizebox{\linewidth}{!}{\includegraphics{eps/Runtime-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}}
-            \caption{Runtime vs Support}
-           \label{RuntimeSupport}
-     \end{subfigure}
-     
-     \begin{subfigure}[b]{0.5\textwidth}
-            \centering
-            \resizebox{\linewidth}{!}{\includegraphics{eps/MaxTracked-Runtime-zipf-2.0-10000-delta-0.01-stream-100000.eps}}
-            \caption{Maximum Number of Tracked Items vs Runtime}
-            \label{MaxTrackedRuntime}
-      \end{subfigure}
-     \caption{Memory \& Runtime \& Support; $z=2.0$, $10^{4}$ distinct items and $10^{5}$ items in stream.}  
-      \label{MemoryRuntimeSupport}
- \end{figure}
-
+      \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=1\linewidth]{eps/MaxTracked-Runtime-zipf-2.0-10000-delta-0.01-stream-100000.eps}
+        \caption{Maximum Number of Tracked Items vs Runtime}
+        \label{MaxTrackedRuntime}
+      \end{minipage}
+\end{figure}
  Figure~\ref{MaxTrackedSupport} indicates that they all have fixed memory .
  Because as the items coming, they store most of the items that have high probabilities.
 But for SpaceSaving, the fixed memory is $1/s$, so it drops when $s$ increases. 
@@ -210,19 +212,49 @@ affect runtime of StickySampling much. And for LossyCounting, stream size $N$
 affects much more than $s$. In addition, runtime of StickySampling and SpaceSaving are not affected by $N$, 
 LossyCounting has higher runtime than them.
 
+Figure~\ref{MaxTrackedRuntime} indicates that memory of StickySampling and LossyCounting
+do not have correlation with the runtime. 
+
+\subsection{Precision \& Runtime \& Skew}
+
+\begin{figure}[!htb]
+      \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=1\linewidth]{eps/Precision-Skew-zipf-100-delta-1000.0-stream-10000.eps}
+        \caption{Precision vs Skew}
+        \label{PrecisionSkew}
+      \end{minipage}\hfill
+      \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=1\linewidth]{eps/Runtime-Skew-zipf-100-delta-1000.0-stream-10000.eps}
+        \caption{Runtime vs Skew}
+        \label{RuntimeSkew}
+      \end{minipage}
+\end{figure}
+
 \subsection{Average Relative Error vs Support}
 Figure~\ref{AverageRelativeErrorSupport} shows the average relative error of StickySampling, LossyCounting and SpaceSaving.
 
- \begin{figure}
+ \begin{figure}[t]
       \centering
-     \begin{subfigure}[b]{0.8\textwidth}
+     \begin{subfigure}[b]{0.6\textwidth}
       \centering
       \resizebox{\linewidth}{!}{\includegraphics{eps/AverageRelativeError-Support-zipf-2.0-100-delta-0.01-stream-100000.eps}} 
       \end{subfigure}
-      \caption{Average Relative Error vs Support}  
+      \caption{Average Relative Error vs Support; $z$ = 2.0, $10^2$ distinct items and $10^5$ items in stream.}  
       \label{AverageRelativeErrorSupport}
  \end{figure}
+It indicates that 
+ LossyCounting always record the right count of an item.
+ SpaceSaving also record the right count when $s$ is proper. 
+ When $s$ is greater than some value, its estimates become worse.
+ StickySampling has an logarithmic trend of the average relative error.
+ This is because the higher $s$ is, the less counters it has. 
+ Thus, average relative error becomes smaller.
 
+ \section{Conclusion}\label{conclusion}
+
+ \clearpage
 \bibliographystyle{IEEEtran}
 \bibliography{main}
 \end{document}

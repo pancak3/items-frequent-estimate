@@ -19,6 +19,12 @@ class StickySampling:
         self.s = s
         self.t = ceil(1 / e * log(1 / (s * d)))
         self.N = 0
+        self.max_tracked = 0
+
+    def update_max_tracked(self):
+        n = len(self.S)
+        if n > self.max_tracked:
+            self.max_tracked = n
 
     def get_rate(self):
         rate = 1 if self.N == 1 else 2 ** (floor(log(self.N - 1, 2)))
@@ -35,6 +41,7 @@ class StickySampling:
                 # if f becomes 0 during this process, we delete the entry from S
                 if entry.f > 0:
                     S[entry.e] = entry
+            self.update_max_tracked()
             self.S = S
             self.r = rate
         return self.r
@@ -48,6 +55,7 @@ class StickySampling:
             toll = random.choices([True, False], [rate, 1 - rate])
             if toll:
                 self.S[x] = EntryStickySampling(e=x, f=1)
+                self.update_max_tracked()
 
     def request(self):
         ret = [[], []]

@@ -15,6 +15,12 @@ class SpaceSaving:
         self.t = ceil(t)
         self.C = {}
         self.SortedC = []
+        self.max_tracked = 0
+
+    def update_max_tracked(self):
+        n = len(self.C)
+        if n > self.max_tracked:
+            self.max_tracked = n
 
     def sort_entries(self):
         self.SortedC = self.C.values()
@@ -28,6 +34,7 @@ class SpaceSaving:
         elif len(self.C) < self.t:
             self.sort_entries()
             self.C[x] = EntrySpaceSaving(x, 1)
+            self.update_max_tracked()
         else:
             # let em be the element with least hits, min
             # replace em with e

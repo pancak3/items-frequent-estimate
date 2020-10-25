@@ -18,6 +18,12 @@ class LossyCounting:
         self.D = {}
         self.w = 1 / e
         self.N = 0
+        self.max_tracked = 0
+
+    def update_max_tracked(self):
+        n = len(self.D)
+        if n > self.max_tracked:
+            self.max_tracked = n
 
     def get_b_curr(self):
         return ceil(self.N / self.w)
@@ -28,6 +34,7 @@ class LossyCounting:
             self.D[x].f += 1
         else:
             self.D[x] = EntryLossyCounting(x, 1, self.get_b_curr() - 1)
+            self.update_max_tracked()
 
         if self.N == 0 % self.w:
             D = {}
@@ -35,6 +42,7 @@ class LossyCounting:
                 if entry.f + entry.d > self.get_b_curr():
                     D[entry.e] = entry
             self.D = D
+            self.update_max_tracked()
 
     def request(self):
         ret = [[],[]]

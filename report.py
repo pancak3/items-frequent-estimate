@@ -80,7 +80,7 @@ def test(zipf: Zipf, s: float, d: float):
     for num in zipf.stream:
         sticky_sampling_.feed(num)
     sticky_sampling_res = Result("StickySampling",
-                                 len(sticky_sampling_.S),
+                                 sticky_sampling_.max_tracked,
                                  sticky_sampling_.request(),
                                  baseline_res_,
                                  zipf.items,
@@ -92,7 +92,7 @@ def test(zipf: Zipf, s: float, d: float):
     for num in zipf.stream:
         lossy_counting_.feed(num)
     lossy_counting_res = Result("LossyCounting",
-                                len(lossy_counting_.D),
+                                lossy_counting_.max_tracked,
                                 lossy_counting_.request(),
                                 baseline_res_,
                                 zipf.items,
@@ -104,7 +104,7 @@ def test(zipf: Zipf, s: float, d: float):
     for num in zipf.stream:
         space_sampling_.feed(num)
     space_sampling_res = Result("SpaceSaving",
-                                len(space_sampling_.C),
+                                space_sampling_.max_tracked,
                                 space_sampling_.request(),
                                 baseline_res_,
                                 zipf.items,
@@ -214,6 +214,8 @@ def average_relative_error(low: float, high: float, size: int, z: float, distinc
     zipf.proof(stream_size, draw=False)
 
     def calc_relative_err(res, real_):
+        if not len(res[0]):
+            return 0
         s_ = 0
         for i, item in enumerate(res[0]):
             s_ += abs(res[1][i] - real_[item]) / real_[item]
@@ -245,7 +247,8 @@ def average_relative_error(low: float, high: float, size: int, z: float, distinc
         lossy_counting_average_relative_err = calc_relative_err(lossy_counting_res, real_counts)
         space_sampling_average_relative_err = calc_relative_err(space_sampling_res, real_counts)
 
-        df_average_relative_err[s] = [sticky_sampling_average_relative_err, lossy_counting_average_relative_err,
+        df_average_relative_err[s] = [sticky_sampling_average_relative_err,
+                                      lossy_counting_average_relative_err,
                                       space_sampling_average_relative_err]
 
     df_average_relative_err = df_average_relative_err.T
@@ -265,6 +268,109 @@ def average_relative_error(low: float, high: float, size: int, z: float, distinc
         format='eps')
 
 
+def precision_runtime_vs_z(low: float, high: float, size: int, s: float, distinct_nums: int, stream_size: int):
+    indexes = ["Baseline", "StickySampling",
+               "LossyCounting", "SpaceSaving"]
+    precision_vs_skew = {}
+    runtime_vs_skew = {}
+
+    zs = np.linspace(low, high, size)
+    e = s / 10
+    d = 1 / s
+    for z in tqdm.tqdm(zs, desc="Skew,z"):
+        zipf = Zipf(z, distinct_nums)
+        zipf.proof(stream_size, draw=False)
+
+        start_time = time()
+        baseline_ = Baseline()
+        # for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
+        for num in zipf.stream:
+            baseline_.feed(num)
+
+        baseline_res_ = baseline_.request(s)
+        baseline_res = Result("Baseline",
+                              len(baseline_.counter),
+                              baseline_res_,
+                              baseline_res_,
+                              zipf.items,
+                              time() - start_time)
+
+        start_time = time()
+        sticky_sampling_ = StickySampling(s=s, e=e, d=d)
+        # for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
+        for num in zipf.stream:
+            sticky_sampling_.feed(num)
+        sticky_sampling_res = Result("StickySampling",
+                                     sticky_sampling_.max_tracked,
+                                     sticky_sampling_.request(),
+                                     baseline_res_,
+                                     zipf.items,
+                                     time() - start_time)
+
+        start_time = time()
+        lossy_counting_ = LossyCounting(s=s, e=e)
+        # for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
+        for num in zipf.stream:
+            lossy_counting_.feed(num)
+        lossy_counting_res = Result("LossyCounting",
+                                    lossy_counting_.max_tracked,
+                                    lossy_counting_.request(),
+                                    baseline_res_,
+                                    zipf.items,
+                                    time() - start_time)
+
+        start_time = time()
+        space_sampling_ = SpaceSaving(1 / s)
+        # for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
+        for num in zipf.stream:
+            space_sampling_.feed(num)
+        space_sampling_res = Result("SpaceSaving",
+                                    space_sampling_.max_tracked,
+                                    space_sampling_.request(),
+                                    baseline_res_,
+                                    zipf.items,
+                                    time() - start_time)
+
+        df = DataFrame(data=[vars(baseline_res).values(),
+                             vars(sticky_sampling_res).values(),
+                             vars(lossy_counting_res).values(),
+                             vars(space_sampling_res).values()],
+                       columns=vars(baseline_res).keys())
+        df.index = indexes
+        precision_vs_skew[z] = df["precision"]
+
+        runtime_vs_skew[z] = df["time_cost"]
+
+    precision_vs_skew = DataFrame(precision_vs_skew).T
+    runtime_vs_skew = DataFrame(runtime_vs_skew).T
+
+    plt.figure()
+    ax = precision_vs_skew.StickySampling.plot(label="StickySampling", style='1-', legend=True)
+    ax = precision_vs_skew.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
+    precision_vs_skew.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
+    ax.set_xlabel(r'Skew $z$ ')
+    ax.set_ylabel(r'Precision')
+    plt.legend()
+    plt.title(r'Precision vs Skew $z$')
+    plt.show()
+    ax.get_figure().savefig(
+        'report/eps/Precision-Skew-zipf-{}-delta-{}-stream-{}.eps'.format(distinct_nums, d, stream_size),
+        format='eps')
+
+    plt.figure()
+    ax = runtime_vs_skew.StickySampling.plot(label="StickySampling", style='1-', legend=True)
+    ax = runtime_vs_skew.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
+    runtime_vs_skew.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
+    ax.set_xlabel(r'Skew $z$ ')
+    ax.set_ylabel(r'Runtime (Micro Seconds)')
+    plt.legend()
+    plt.title(r'Runtime vs Skew $z$')
+    plt.show()
+    ax.get_figure().savefig(
+        'report/eps/Runtime-Skew-zipf-{}-delta-{}-stream-{}.eps'.format(distinct_nums, d, stream_size),
+        format='eps')
+
+
 def run():
     z = 2.0
     distinct_nums = 10000
@@ -272,7 +378,13 @@ def run():
     stream_size = 100000
 
     # power_law(distinct_nums=distinct_nums, stream_size=stream_size)
-    #
-    support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
-    # average_relative_error(low=0.00001, high=0.0125, size=100, z=z, distinct_nums=distinct_nums, d=d,
-    #                        stream_size=stream_size)
+    precision_runtime_vs_z(low=0.00001, high=0.0125, size=100,
+                           s=0.001,
+                           distinct_nums=1000, stream_size=100000)
+
+    # support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
+    # average_relative_error(low=0.00001, high=0.0125, size=100,
+    #                        z=z,
+    #                        distinct_nums=100,
+    #                        d=d,
+    #                        stream_size=100000)

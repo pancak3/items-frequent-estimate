@@ -44,21 +44,22 @@ class Zipf:
         df_filename = "zipf-{}-{}-stream-{}.df".format(self.z, self.distinct_nums, stream_size)
         stream_filename = "zipf-{}-{}-stream-{}.in".format(self.z, self.distinct_nums, stream_size)
         if os.path.exists(df_filename):
-            print("[*] read {} {}".format(stream_filename, df_filename))
+            # print("[*] read {} {}".format(stream_filename, df_filename))
             df = read_csv(df_filename, index_col="index")
             self.stream = load(stream_filename)
         else:
             records = defaultdict(lambda: {"count": 0, "prob": .0})
             if os.path.exists(stream_filename):
-                print("[*] load stream: {}".format(stream_filename))
+                # print("[*] load stream: {}".format(stream_filename))
                 self.stream = load(stream_filename)
                 for num in tqdm.tqdm(self.stream, desc="zipf count"):
                     records[num]["count"] += 1
             else:
-                for _ in tqdm.tqdm(range(0, stream_size), desc="zipf gen and count"):
+                # for _ in tqdm.tqdm(range(0, stream_size), desc="zipf gen and count"):
+                for _ in range(0, stream_size):
                     num = self.gen()
                     records[num]["count"] += 1
-                print("[*] dump stream: {}".format(stream_filename))
+                # print("[*] dump stream: {}".format(stream_filename))
                 dump(self.stream, filename=stream_filename)
             self.total = 0
 
