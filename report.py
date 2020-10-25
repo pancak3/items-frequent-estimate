@@ -344,6 +344,9 @@ def precision_runtime_vs_z(low: float, high: float, size: int, s: float, distinc
     precision_vs_skew = DataFrame(precision_vs_skew).T
     runtime_vs_skew = DataFrame(runtime_vs_skew).T
 
+    print(precision_vs_skew)
+    print(runtime_vs_skew)
+
     plt.figure()
     ax = precision_vs_skew.StickySampling.plot(label="StickySampling", style='1-', legend=True)
     ax = precision_vs_skew.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
@@ -378,9 +381,10 @@ def run():
     stream_size = 100000
 
     # power_law(distinct_nums=distinct_nums, stream_size=stream_size)
-    precision_runtime_vs_z(low=0.00001, high=0.0125, size=100,
+    precision_runtime_vs_z(low=1.1, high=5.1, size=100,
                            s=0.001,
-                           distinct_nums=1000, stream_size=100000)
+                           distinct_nums=1000,
+                           stream_size=100000)
 
     # support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
     # average_relative_error(low=0.00001, high=0.0125, size=100,
