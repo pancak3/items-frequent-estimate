@@ -1,3 +1,8 @@
+"""
+Updated on Oct 2020
+@author: Qifan Deng
+"""
+
 from math import floor, ceil
 
 
@@ -45,7 +50,7 @@ class LossyCounting:
             self.update_max_tracked()
 
     def request(self):
-        ret = [[],[]]
+        ret = [[], []]
         for entry in self.D.values():
             if entry.f >= self.N * (self.s - self.e):
                 ret[0].append(entry.e)

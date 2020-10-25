@@ -45,7 +45,7 @@
 \section{Introduction}
 Three algorithms are implemented in this report to estimate the most frequent items of a data stream.
 They are StickySampling \cite{stickylossy}, LossyCounting \cite{stickylossy} and SpaceSaving \cite{spacesaving}. 
-There is also a Baseline algorithm implemented to investigate the performance of the three algorithms.
+% There is also a Baseline algorithm implemented to investigate the performance of the three algorithms.
 
 The structure of this report is as follows. 
 Section~\ref{preparation} introduces the set-up including hardware, operating system, environments 
@@ -59,7 +59,7 @@ gives recommandations and lists possible further improvements.
 \section{Hardware \& Environments \& Data Stream}\label{preparation}
 
 \paragraph{Hardware}
-The experiments in section are conducted on a machin with the following specs
+The experiments in section are conducted on a machin with the following specifications,
 \begin{itemize}
      \setlength\itemsep{1pt}
        \item CPU: 1.8 GHz Quad-Core Intel Core i5
@@ -67,17 +67,17 @@ The experiments in section are conducted on a machin with the following specs
        \item Disk: WDC PC SN720 SDAPNTW-512G-1127 SSD
 \end{itemize}
 \paragraph{Environment}
-The testing operating system is macOS Catalina version 10.15.7 (19H2).
-All the algorithms are implemented in Python 3.8.5.
-The requirements of the algorithms are stored in requirements.txt which can be installed with command pip install -r requirements.txt.
+The testing operating system is \texttt{macOS Catalina version 10.15.7 (19H2)}.
+All the algorithms are implemented in \texttt{Python 3.8.5}.
+The requirements of the algorithms are stored in \texttt{requirements.txt} which can be installed with command \texttt{pip install -r requirements.txt}.
 
 \paragraph{Repeat Tests}
-Once the environments are prepared, run python3 main.py to get all the figures in this report.
+Once the environments are prepared, run \texttt{python3 main.py} under the source code folder to get all the figures in this report.
 
 \paragraph{Data Stream}
 The data stream is power-law distribution where 
 the $i^{th}$ most frequent item has probability $\frac{1}{i^{z} \cdot{} Zeta(z)}$
-where $z$ is a positive real-value parameter and $Zeta$ is Riemann or Hurwitz zeta function \cite{zeta}. 
+where $z$ is a positive real-value parameter and $Zeta$ is \texttt{Riemann or Hurwitz zeta function} \cite{zeta}. 
 Figure~\ref{powerlaw} shows the distribution when $z = \{1.1, 1.4, 1.7, 2.0\}$ and the data stream size is $10^6$.
 As it shows, they have almost the ideal trend except when $z$ is close to 1. 
 This proves that data streams in this report are desired.
@@ -112,11 +112,11 @@ $819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
 \end{figure}
 
 \section{Implementations}\label{implementations}
-\paragraph{Baseline}
-Baseline algorithm is simple to implement. The algorithm holds counters $C$.
-The $i^{th}$ item $x$ in data stream with $N$ items is called entry $<x, f>$. 
-If $x$ is not in $C$ , set $C_n$ to $<x, 1>$. Otherwise, increment $C_x$ to $<x, f+1>$.
-When user requests with support $s$, return the entries with $f$ greater than $f\cdot{}N$.
+% \paragraph{Baseline}
+% Baseline algorithm is simple to implement. The algorithm holds counters $C$.
+% The $i^{th}$ item $x$ in data stream with $N$ items is called entry $<x, f>$. 
+% If $x$ is not in $C$ , set $C_n$ to $<x, 1>$. Otherwise, increment $C_x$ to $<x, f+1>$.
+% When user requests with support $s$, return the entries with $f$ greater than $f\cdot{}N$.
 \paragraph{StickySampling \& LossyCounting \& SpaceSaving}
 These three algorithms are implemented following the respective papers \cite{spacesaving,spacesaving}.
 
@@ -129,11 +129,11 @@ The theoretical performance of them should be what Table~\ref{theoretical_perfor
       \hline
       & Baseline & StickySampling & LossyCounting & SpaceSaving \\ [0.5ex] 
       \hline\hline
-      Update Time & $O(1)$ &  $O(\frac{20}{s}(log(\frac{100}{s}))$ & $O(\frac{10}{s}log(\frac{sN}{10}))$ & $O(log(s^{-1}))$ \\
+      Update Time & $O(1)$ &  $O(20s^{-1}log(100s^{-1}))$ & $O(10s^{-1}log(10^{-1}sN))$ & $O(log(s^{-1}))$ \\
       \hline
-      Memory & $O(n)$ & $O(\frac{20}{s}(log(\frac{100}{s}))$ & $O(\frac{10}{s}log(\frac{sN}{10}))$& $O(s^{-1})$ \\ 
+      Memory & $O(n)$ & $O(20s^{-1}(log100s^{-1}))$ & $O(10s^{-1}log(10^{-1}sN))$& $O(s^{-1})$ \\ 
       \hline
-      Accuracy & 100\% &545 & 778 & 7507 \\
+      Accuracy & 100\% & $O(s^{-1}N)$ & $O(s^{-1}N)$ & $O(ms^{-1})$ \\
       \hline
       \end{tabular}
      \caption{Theoretical performance of Baseline, StickySampling, LossyCounting and SpaceSaving;
@@ -142,8 +142,6 @@ The theoretical performance of them should be what Table~\ref{theoretical_perfor
       \label{theoretical_performance}
 \end{table}
 
-The accuracy is defined to be $(TP + TN) / (TP + TN + FP + FN)$ 
-where $TP$ is true positive, $TN$ is true negative, $FP$ is false negative and $FN$ is false negative.
 \paragraph{Baseline}
 The update time of Baseline is $O(1)$ because it just increament the corresponding $f$ with no other operation when updates.
 Its memory cost is $O(n)$ since it stores every distinct items. And accuracy is 100\% obviously.
@@ -182,20 +180,20 @@ where the data is from the tests Figure~\ref{MaxTrackedSupport} and \ref{Runtime
       \begin{minipage}{0.48\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{eps/MaxTracked-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}
-        \caption{Maximum Number of Tracked Items vs Support}
+        \caption{Maximum Number of Tracked Items vs Support; $z=2.0$, $10^4$ distinct items and $10^5$ items in stream.}
         \label{MaxTrackedSupport}
       \end{minipage}\hfill
       \begin{minipage}{0.48\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{eps/Runtime-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}
-        \caption{Runtime vs Support}
+        \caption{Runtime vs Support; $z=2.0$, $10^4$ distinct items and $10^5$ items in stream.}
         \label{RuntimeSupport}
       \end{minipage}
       \centering
       \begin{minipage}{0.48\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{eps/MaxTracked-Runtime-zipf-2.0-10000-delta-0.01-stream-100000.eps}
-        \caption{Maximum Number of Tracked Items vs Runtime}
+        \caption{Maximum Number of Tracked Items vs Runtime; $z=2.0$, $10^4$ distinct items and $10^5$ items in stream.}
         \label{MaxTrackedRuntime}
       \end{minipage}
 \end{figure}
@@ -221,17 +219,34 @@ do not have correlation with the runtime.
 \begin{figure}[H]
       \begin{minipage}{0.48\textwidth}
         \centering
-        \includegraphics[width=1\linewidth]{eps/Precision-Skew-zipf-100-delta-1000.0-stream-10000.eps}
-        \caption{Precision vs Skew}
+        \includegraphics[width=1\linewidth]{eps/Precision-Skew-s-0.0001-zipf-1000-delta-10000.0-stream-100000.eps}
+        \caption{Precision vs Skew; $s=0.0001$, $10^3$ distinct items and $10^5$ items in stream.}
         \label{PrecisionSkew}
       \end{minipage}\hfill
       \begin{minipage}{0.48\textwidth}
         \centering
-        \includegraphics[width=1\linewidth]{eps/Runtime-Skew-zipf-100-delta-1000.0-stream-10000.eps}
-        \caption{Runtime vs Skew}
+        \includegraphics[width=1\linewidth]{eps/Runtime-Skew-s-0.0001-zipf-1000-delta-10000.0-stream-100000.eps}
+        \caption{Runtime vs Skew; $s=0.0001$, $10^3$ distinct items and $10^5$ items in stream.}
         \label{RuntimeSkew}
       \end{minipage}
 \end{figure}
+
+Figure~\ref{PrecisionSkew} indicates that 
+StickySampling always has precision close to 1 no matter how the 
+stream distribution varies. 
+Besides, LossyCounting also has a similar precision but is less stable.
+On the contratry, SpaceSaving has much lower precision but the precision
+increases as $z$ increasing.
+
+Figure~\ref{RuntimeSkew} indicates that all the three algorithms run faster
+when $z$ is greater. This is because counters evicting happens less
+when new items appear less in such distributions. 
+The figure also shows that, when $z$ is big enough, SpaceSaving is faster than StickySampling, 
+and StickySampling is faster than LossyCounting. 
+However, when $z$ is small, SpaceSaving is much slower than the other two when they have
+similar. 
+This is because when new items come more frequently ($z$ is small),
+SpaceSaving has to modify its counter more frequently which involves sorting counters.
 
 \subsection{Average Relative Error vs Support}
 Figure~\ref{AverageRelativeErrorSupport} shows the average relative error of StickySampling, LossyCounting and SpaceSaving.
@@ -254,7 +269,30 @@ It indicates that
  Thus, average relative error becomes smaller.
 
  \section{Conclusion}\label{conclusion}
+ In practice, unexcepted situation always happens. 
+ For example, in \cite{stickylossy}, LossyCounting is said to be better than StickySampling in practice,
+ however, in the practice of this report, LossyCounting is worse than StickySampling both in practice and theoretically.
+ This may because $\epsilon{} = s/10$ in this report but \cite{stickylossy} dose not. 
+ Better performance of LossyCounting may be achieve by trying different $\epsilon$.
+ Furthermore, the runtime tests on the three algorithms sometimes vary a lot even on the same data stream.
+ This is because the computing resources of an operating system vary even during a short period of time.
 
+ StickySampling, LossyCounting and SpaceSaving are investigated in this report and
+ they all have different merits and shortcomings. 
+ If the number of distinct items is known(estimable) and the space is very lacked,
+ SpaceSaving is the best choice since it uses few space and has better performance with proper number of fixed counters.
+ Otherwise, if the number is invisible, LossyCounting gives a very high and stable precision but it is little slower 
+ than StickySampling and also uses more space. If one prefers a stable precision and 
+ does not mind the runtime and space difference, LossyCounting is a better choice than StickySampling.
+
+ The following three possible improvements of this report. 
+ The first, the tests, comparasion and analysis of the three algoritms against 
+ Baseline can be made.
+ The second, all the tests should be taken multiple times on the same machine.
+ During the testing, the operating system should not have other computing tasks to avoid resources competion.
+ The last, large numbers of distinct items in stream should be tested to presents the 
+ outstanding performance of SpaceSaving. This is not tested because the testing machine does not has high performance.
+  
  \clearpage
 \bibliographystyle{IEEEtran}
 \bibliography{main}

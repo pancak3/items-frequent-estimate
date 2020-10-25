@@ -1,3 +1,8 @@
+"""
+Updated on Oct 2020
+@author: Qifan Deng
+"""
+
 import random
 from collections import defaultdict
 from pandas import DataFrame, read_csv

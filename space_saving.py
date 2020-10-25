@@ -1,4 +1,8 @@
-from functools import cmp_to_key
+"""
+Updated on Oct 2020
+@author: Qifan Deng
+"""
+
 from math import ceil
 
 

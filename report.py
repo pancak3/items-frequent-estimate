@@ -1,3 +1,8 @@
+"""
+Updated on Oct 2020
+@author: Qifan Deng
+"""
+
 import gc
 import os
 import psutil
@@ -9,7 +14,8 @@ from sticky_sampling import StickySampling
 from lossy_counting import LossyCounting
 from space_saving import SpaceSaving
 from baseline import Baseline
-from time import time
+from time import time, sleep
+from random import randint
 from pprint import pprint
 from pandas import DataFrame
 from matplotlib.ticker import ScalarFormatter
@@ -156,7 +162,7 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     indexes = [float(i) for i in max_tracked_vs_support.index]
     max_tracked_vs_support.index = indexes
     plt.figure()
-    ax = max_tracked_vs_support.Baseline.plot(label="Baseline", style='_', legend=True)
+    # ax = max_tracked_vs_support.Baseline.plot(label="Baseline", style='_', legend=True)
     ax = max_tracked_vs_support.StickySampling.plot(label="StickySampling", style='1', legend=True)
     ax = max_tracked_vs_support.LossyCounting.plot(label="LossyCounting", style='|', legend=True)
     max_tracked_vs_support.SpaceSaving.plot(label="SpaceSaving", style='.', legend=True)
@@ -173,7 +179,7 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
     indexes = [float(i) for i in runtime_vs_support.index]
     runtime_vs_support.index = indexes
     plt.figure()
-    ax = runtime_vs_support.Baseline.plot(label="Baseline", style='_-', legend=True)
+    # ax = runtime_vs_support.Baseline.plot(label="Baseline", style='_-', legend=True)
     ax = runtime_vs_support.StickySampling.plot(label="StickySampling", style='1-', legend=True)
     ax = runtime_vs_support.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
     runtime_vs_support.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
@@ -187,7 +193,7 @@ def support(low: float, high: float, size: int, z: float, distinct_nums: int, d:
         format='eps')
 
     plt.figure()
-    ax = max_tracked_vs_runtime.Baseline.plot(label="Baseline", style='_', legend=True)
+    # ax = max_tracked_vs_runtime.Baseline.plot(label="Baseline", style='_', legend=True)
     ax = max_tracked_vs_runtime.StickySampling.plot(label="StickySampling", style='1', legend=True)
     ax = max_tracked_vs_runtime.LossyCounting.plot(label="LossyCounting", style='|', legend=True)
     max_tracked_vs_runtime.SpaceSaving.plot(label="SpaceSaving", style='.', legend=True)
@@ -268,7 +274,8 @@ def average_relative_error(low: float, high: float, size: int, z: float, distinc
         format='eps')
 
 
-def precision_runtime_vs_z(low: float, high: float, size: int, s: float, distinct_nums: int, stream_size: int):
+def precision_runtime_vs_z(repeat: int, low: float, high: float, size: int, s: float, distinct_nums: int,
+                           stream_size: int):
     indexes = ["Baseline", "StickySampling",
                "LossyCounting", "SpaceSaving"]
     precision_vs_skew = {}
@@ -281,68 +288,76 @@ def precision_runtime_vs_z(low: float, high: float, size: int, s: float, distinc
         zipf = Zipf(z, distinct_nums)
         zipf.proof(stream_size, draw=False)
 
-        start_time = time()
-        baseline_ = Baseline()
-        # for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
-        for num in zipf.stream:
-            baseline_.feed(num)
+        for i in range(repeat):
 
-        baseline_res_ = baseline_.request(s)
-        baseline_res = Result("Baseline",
-                              len(baseline_.counter),
-                              baseline_res_,
-                              baseline_res_,
-                              zipf.items,
-                              time() - start_time)
+            start_time = time()
+            baseline_ = Baseline()
+            # for num in tqdm.tqdm(zipf.stream, desc="Baseline"):
+            for num in zipf.stream:
+                baseline_.feed(num)
 
-        start_time = time()
-        sticky_sampling_ = StickySampling(s=s, e=e, d=d)
-        # for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
-        for num in zipf.stream:
-            sticky_sampling_.feed(num)
-        sticky_sampling_res = Result("StickySampling",
-                                     sticky_sampling_.max_tracked,
-                                     sticky_sampling_.request(),
-                                     baseline_res_,
-                                     zipf.items,
-                                     time() - start_time)
+            baseline_res_ = baseline_.request(s)
+            baseline_res = Result("Baseline",
+                                  len(baseline_.counter),
+                                  baseline_res_,
+                                  baseline_res_,
+                                  zipf.items,
+                                  time() - start_time)
 
-        start_time = time()
-        lossy_counting_ = LossyCounting(s=s, e=e)
-        # for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
-        for num in zipf.stream:
-            lossy_counting_.feed(num)
-        lossy_counting_res = Result("LossyCounting",
-                                    lossy_counting_.max_tracked,
-                                    lossy_counting_.request(),
-                                    baseline_res_,
-                                    zipf.items,
-                                    time() - start_time)
+            start_time = time()
+            sticky_sampling_ = StickySampling(s=s, e=e, d=d)
+            # for num in tqdm.tqdm(zipf.stream, desc="StickySampling"):
+            for num in zipf.stream:
+                sticky_sampling_.feed(num)
+            sticky_sampling_res = Result("StickySampling",
+                                         sticky_sampling_.max_tracked,
+                                         sticky_sampling_.request(),
+                                         baseline_res_,
+                                         zipf.items,
+                                         time() - start_time)
 
-        start_time = time()
-        space_sampling_ = SpaceSaving(1 / s)
-        # for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
-        for num in zipf.stream:
-            space_sampling_.feed(num)
-        space_sampling_res = Result("SpaceSaving",
-                                    space_sampling_.max_tracked,
-                                    space_sampling_.request(),
-                                    baseline_res_,
-                                    zipf.items,
-                                    time() - start_time)
+            start_time = time()
+            lossy_counting_ = LossyCounting(s=s, e=e)
+            # for num in tqdm.tqdm(zipf.stream, desc="LossyCounting"):
+            for num in zipf.stream:
+                lossy_counting_.feed(num)
+            lossy_counting_res = Result("LossyCounting",
+                                        lossy_counting_.max_tracked,
+                                        lossy_counting_.request(),
+                                        baseline_res_,
+                                        zipf.items,
+                                        time() - start_time)
 
-        df = DataFrame(data=[vars(baseline_res).values(),
-                             vars(sticky_sampling_res).values(),
-                             vars(lossy_counting_res).values(),
-                             vars(space_sampling_res).values()],
-                       columns=vars(baseline_res).keys())
-        df.index = indexes
-        precision_vs_skew[z] = df["precision"]
+            start_time = time()
+            space_sampling_ = SpaceSaving(1 / s)
+            # for num in tqdm.tqdm(zipf.stream, desc="SpaceSaving"):
+            for num in zipf.stream:
+                space_sampling_.feed(num)
+            space_sampling_res = Result("SpaceSaving",
+                                        space_sampling_.max_tracked,
+                                        space_sampling_.request(),
+                                        baseline_res_,
+                                        zipf.items,
+                                        time() - start_time)
 
-        runtime_vs_skew[z] = df["time_cost"]
+            df = DataFrame(data=[vars(baseline_res).values(),
+                                 vars(sticky_sampling_res).values(),
+                                 vars(lossy_counting_res).values(),
+                                 vars(space_sampling_res).values()],
+                           columns=vars(baseline_res).keys())
+            df.index = indexes
+            if z not in precision_vs_skew:
+                precision_vs_skew[z] = df["precision"]
+                runtime_vs_skew[z] = df["time_cost"]
+            else:
+                precision_vs_skew[z] += df["precision"]
+                runtime_vs_skew[z] += df["time_cost"]
 
     precision_vs_skew = DataFrame(precision_vs_skew).T
     runtime_vs_skew = DataFrame(runtime_vs_skew).T
+
+    precision_vs_skew = precision_vs_skew.div(repeat)
+    runtime_vs_skew = runtime_vs_skew.div(repeat)
 
     print(precision_vs_skew)
     print(runtime_vs_skew)
@@ -352,12 +367,16 @@ def precision_runtime_vs_z(low: float, high: float, size: int, s: float, distinc
     ax = precision_vs_skew.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
     precision_vs_skew.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
     ax.set_xlabel(r'Skew $z$ ')
-    ax.set_ylabel(r'Precision')
+    if repeat > 1:
+        ax.set_ylabel(r'Average Precision')
+        plt.title(r'Average Precision vs Skew $z$; $s={}$'.format(s))
+    else:
+        ax.set_ylabel(r'Precision')
+        plt.title(r'Precision vs Skew $z$; $s={}$'.format(s))
     plt.legend()
-    plt.title(r'Precision vs Skew $z$')
     plt.show()
     ax.get_figure().savefig(
-        'report/eps/Precision-Skew-zipf-{}-delta-{}-stream-{}.eps'.format(distinct_nums, d, stream_size),
+        'report/eps/Precision-Skew-s-{}-zipf-{}-delta-{}-stream-{}.eps'.format(s, distinct_nums, d, stream_size),
         format='eps')
 
     plt.figure()
@@ -365,30 +384,35 @@ def precision_runtime_vs_z(low: float, high: float, size: int, s: float, distinc
     ax = runtime_vs_skew.LossyCounting.plot(label="LossyCounting", style='|-', legend=True)
     runtime_vs_skew.SpaceSaving.plot(label="SpaceSaving", style='.-', legend=True)
     ax.set_xlabel(r'Skew $z$ ')
-    ax.set_ylabel(r'Runtime (Micro Seconds)')
+    if repeat > 1:
+        plt.title(r'Average Runtime vs Skew $z$; $s={}$'.format(s))
+        ax.set_ylabel(r'Average Runtime (Micro Seconds)')
+    else:
+        plt.title(r'Runtime vs Skew $z$; $s={}$'.format(s))
+        ax.set_ylabel(r'Runtime (Micro Seconds)')
+
     plt.legend()
-    plt.title(r'Runtime vs Skew $z$')
     plt.show()
     ax.get_figure().savefig(
-        'report/eps/Runtime-Skew-zipf-{}-delta-{}-stream-{}.eps'.format(distinct_nums, d, stream_size),
+        'report/eps/Runtime-Skew-s-{}-zipf-{}-delta-{}-stream-{}.eps'.format(s, distinct_nums, d, stream_size),
         format='eps')
 
 
 def run():
     z = 2.0
-    distinct_nums = 10000
     d = 0.01
-    stream_size = 100000
 
-    # power_law(distinct_nums=distinct_nums, stream_size=stream_size)
+    power_law(distinct_nums=100,
+              stream_size=1000000)
+
     precision_runtime_vs_z(low=1.1, high=5.1, size=100,
-                           s=0.001,
+                           s=0.0001, repeat=1,
                            distinct_nums=1000,
                            stream_size=100000)
 
-    # support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
-    # average_relative_error(low=0.00001, high=0.0125, size=100,
-    #                        z=z,
-    #                        distinct_nums=100,
-    #                        d=d,
-    #                        stream_size=100000)
+    support(low=0.00001, high=0.01, size=100, z=z, distinct_nums=distinct_nums, d=d, stream_size=stream_size)
+    average_relative_error(low=0.00001, high=0.0125, size=100,
+                           z=z,
+                           distinct_nums=100,
+                           d=d,
+                           stream_size=100000)

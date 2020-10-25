@@ -1,3 +1,9 @@
+"""
+Updated on Oct 2020
+@author: Qifan Deng
+"""
+
+
 def sci(num: int):
     a = num
     b = 0
