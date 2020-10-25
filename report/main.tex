@@ -18,6 +18,7 @@
 \usepackage{amsmath}
 \usepackage[ruled,linesnumbered]{algorithm2e}
 \usepackage{epstopdf}
+\usepackage{float}
 
 \newcommand\gauss[2]{1/(#2*sqrt(2*pi))*exp(-((x-#1)^2)/(2*#2^2))}
 \newcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
@@ -84,7 +85,7 @@ Besides, as Figure~\ref{powerlaw} annotates, there are $717130$ items has freque
 $819018$ when  $z=1.4$, $880423$ when $z=1.7$ and $924202$ when $z=2.0$.
 
 
-\begin{figure}[!t]
+\begin{figure}[H]
      \begin{subfigure}[b]{0.5\textwidth}
           \centering
           \resizebox{\linewidth}{!}{\includegraphics{eps/zipf-1.1-100-stream-1000000.eps}}
@@ -122,7 +123,7 @@ These three algorithms are implemented following the respective papers \cite{spa
 The theoretical performance of them should be what Table~\ref{theoretical_performance} shows.
 
 \subsection{Theoretical Performance \& Justification}
-\begin{table}[h!]
+\begin{table}[H]
      \centering
       \begin{tabular}{||c | c | c| c| c||} 
       \hline
@@ -177,7 +178,7 @@ Figure~\ref{RuntimeSupport} shows runtime vs support.
 Finally, Figure~\ref{MaxTrackedRuntime} shows memory vs runtime 
 where the data is from the tests Figure~\ref{MaxTrackedSupport} and \ref{RuntimeSupport}.
 
-\begin{figure}[!htb]
+\begin{figure}[H]
       \begin{minipage}{0.48\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{eps/MaxTracked-Support-zipf-2.0-10000-delta-0.01-stream-100000.eps}
@@ -217,7 +218,7 @@ do not have correlation with the runtime.
 
 \subsection{Precision \& Runtime \& Skew}
 
-\begin{figure}[!htb]
+\begin{figure}[H]
       \begin{minipage}{0.48\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{eps/Precision-Skew-zipf-100-delta-1000.0-stream-10000.eps}
@@ -235,7 +236,7 @@ do not have correlation with the runtime.
 \subsection{Average Relative Error vs Support}
 Figure~\ref{AverageRelativeErrorSupport} shows the average relative error of StickySampling, LossyCounting and SpaceSaving.
 
- \begin{figure}[t]
+ \begin{figure}[H]
       \centering
      \begin{subfigure}[b]{0.6\textwidth}
       \centering
