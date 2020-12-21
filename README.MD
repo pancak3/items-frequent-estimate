@@ -18,6 +18,7 @@ The same experiments can be taken with the command `python main.py`, and similar
 
 ![Average Relative Error vs Support](pictures/AverageRelativeErrorVSSupport.png)
 ![Runtime vs Support](pictures/RuntimeVSSupport.png)
+![Maximum Number of Tracked Items vs Support](pictures/MaximumNumberofTrackedItemsvsSupport.png )
 
 ## Conclusion
 
